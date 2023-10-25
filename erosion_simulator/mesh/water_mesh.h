@@ -1,8 +1,8 @@
 #pragma once
-#include "terrain_mesh.h"
 #include "shader/shader.h"
+#include "quad_mesh.h"
 
-class WaterMesh : public Mesh
+class WaterMesh : public QuadMesh
 {
 public:
 	WaterMesh(int width, int length, float*** waterFloor, float*** waterHeight, Shader shader);

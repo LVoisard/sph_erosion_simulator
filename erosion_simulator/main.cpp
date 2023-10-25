@@ -11,6 +11,7 @@
 #include <vector>
 #include <chrono>
 #include <mesh/water_mesh.h>
+#include "mesh/sphere.h"
 #include "external/simpleppm.h"
 
 #include <iostream>
@@ -60,6 +61,7 @@ HeightMap map(minHeight, maxHeight);
 
 TerrainMesh* terrainMesh;
 WaterMesh* waterMesh;
+Sphere* sphere;
 
 ErosionModel* erosionModel;
 SimulationParametersUI* simParams;
@@ -88,7 +90,7 @@ void raycastThroughScene()
 
 	cursorOverPosition = glm::vec3(INT_MIN);
 
-	for (int i = 0; i < terrainMesh->indexCount; i += 3)
+	for (int i = 0; i < terrainMesh->indices.size(); i += 3)
 	{
 		glm::vec3 triA = terrainMesh->vertices[terrainMesh->indices[i]].pos;
 		glm::vec3 triB = terrainMesh->vertices[terrainMesh->indices[i + 1]].pos;
@@ -617,7 +619,6 @@ void UpdateShaders(glm::mat4& view, glm::mat4& proj, glm::mat4& model, float& de
 {
 	skybox.DrawSkybox(view, proj);
 
-	// draw our first triangle
 	mainShader.use();
 	mainShader.setMat4("model", model);
 	mainShader.setMat4("view", view);
@@ -636,6 +637,7 @@ void UpdateShaders(glm::mat4& view, glm::mat4& proj, glm::mat4& model, float& de
 	rockTexture.use(GL_TEXTURE2);
 
 	terrainMesh->draw();
+	sphere->draw();
 	mainShader.stop();
 
 	waterShader.use();
@@ -658,7 +660,7 @@ int main(int argc, char* argv[])
 	if (argc <= 1)
 	{
 		printf("Invalid arguments, possible commands: \n");
-		printf("default (n (1 - 11)) (randomness factor(0-4)) \n");
+		printf("default (n (1 - 11)) (randomness factor(0-4)) minH maxH \n");
 		printf("heightmap (filepath) \n");
 		printf("obj (filepath) (slopeHeight)\n");
 		return -1;
@@ -691,9 +693,11 @@ int main(int argc, char* argv[])
 
 	terrainMesh = new TerrainMesh(map.getWidth(), map.getLength(), &erosionModel->terrainHeights, mainShader);
 	waterMesh = new WaterMesh(map.getWidth(), map.getLength(), &erosionModel->terrainHeights, &erosionModel->waterHeights, waterShader);
+	sphere = new Sphere(glm::vec3(0), 1, mainShader);
 
 	terrainMesh->init();
 	waterMesh->init();
+	sphere->init();
 
 	glm::mat4 proj = glm::mat4(1.0f);
 	proj = glm::perspective(glm::radians(fov), window.getAspectRatio(), 0.1f, 1000.0f);
@@ -743,9 +747,9 @@ int main(int argc, char* argv[])
 		window.pollEvents();
 	}
 
-	ImGui_ImplOpenGL3_Shutdown();
-	ImGui_ImplGlfw_Shutdown();
-	ImGui::DestroyContext();
+	//ImGui_ImplOpenGL3_Shutdown();
+	//ImGui_ImplGlfw_Shutdown();
+	//ImGui::DestroyContext();
 
 	// glfw: terminate, clearing all previously allocated GLFW resources.
 	// ------------------------------------------------------------------

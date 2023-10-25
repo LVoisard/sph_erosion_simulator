@@ -32,7 +32,7 @@ Skybox::Skybox(std::vector<std::string> faceLocations)
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-	Vertex vertices[] = {
+	std::vector<Vertex> vertices = {
 
 		Vertex(glm::vec3(-1.0f, 1.0f, -1.0f), glm::vec3(0.0f,0.0f,0.0f), glm::vec2(0.0f,0.0f)), // 0
 		Vertex(glm::vec3(-1.0f, -1.0f, -1.0f), glm::vec3(0.0f,0.0f,0.0f), glm::vec2(0.0f,0.0f)), // 1
@@ -54,8 +54,8 @@ Skybox::Skybox(std::vector<std::string> faceLocations)
 		// 1.0f,  1.0f,  1.0f, // 7
 	};
 
-	unsigned int indices[] = {
-		// front
+	std::vector<uint32_t> indices = {
+	// front
 	0, 1, 2,
 	2, 1, 3,
 	// right
@@ -75,7 +75,7 @@ Skybox::Skybox(std::vector<std::string> faceLocations)
 	3, 6, 7
 	};
 
-	skyboxMesh = new Mesh(0, 0, vertices, 8, indices, 36, *skyboxShader);
+	skyboxMesh = new Mesh(vertices, indices, *skyboxShader);
 }
 
 Skybox::~Skybox()

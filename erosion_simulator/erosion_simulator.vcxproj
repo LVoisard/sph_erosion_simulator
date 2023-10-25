@@ -154,6 +154,8 @@
     <ClCompile Include="height_map\height_map.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="mesh\mesh.cpp" />
+    <ClCompile Include="mesh\quad_mesh.cpp" />
+    <ClCompile Include="mesh\sphere.cpp" />
     <ClCompile Include="mesh\terrain_mesh.cpp" />
     <ClCompile Include="shader\shader.cpp" />
     <ClCompile Include="skybox\skybox.cpp" />
@@ -176,6 +178,8 @@
     <ClInclude Include="external\simpleppm.h" />
     <ClInclude Include="height_map\height_map.h" />
     <ClInclude Include="mesh\mesh.h" />
+    <ClInclude Include="mesh\quad_mesh.h" />
+    <ClInclude Include="mesh\sphere.h" />
     <ClInclude Include="mesh\terrain_mesh.h" />
     <ClInclude Include="shader\shader.h" />
     <ClInclude Include="simulation_parameters_ui.h" />

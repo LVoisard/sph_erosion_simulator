@@ -1,7 +1,7 @@
 #pragma once
-#include "mesh.h"
+#include "quad_mesh.h"
 
-class TerrainMesh :  public Mesh
+class TerrainMesh :  public QuadMesh
 {
 public:
 	TerrainMesh(int width, int length, float*** terrainHeights, Shader shader);

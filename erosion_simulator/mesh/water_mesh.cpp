@@ -1,10 +1,10 @@
 #include "water_mesh.h"
 #include "glad/glad.h"
 #include "shader/shader.h"
-#include "mesh.h"
+#include "quad_mesh.h"
 
 WaterMesh::WaterMesh(int width, int length, float*** waterFloor, float*** waterHeight, Shader shader)
-	:Mesh(width, length, shader)
+	:QuadMesh(width, length, shader)
 {	
 	calculateVertices(waterFloor);
 	changeVerticesWaterHeight(waterHeight);
@@ -62,10 +62,10 @@ void WaterMesh::init()
 	glBindVertexArray(VAO);
 
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices[0]) * indexCount, indices, GL_STATIC_DRAW);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices[0]) * indices.size(), indices.data(), GL_STATIC_DRAW);
 
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices[0]) * vertexCount, vertices, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices[0]) * vertices.size(), vertices.data(), GL_STATIC_DRAW);
 
 	glEnableVertexAttribArray(shader.getAttribLocation("pos"));
 	glEnableVertexAttribArray(shader.getAttribLocation("normal"));

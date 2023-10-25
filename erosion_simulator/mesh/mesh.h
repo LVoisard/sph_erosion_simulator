@@ -12,31 +12,25 @@ struct Vertex
 	float height;
 	glm::vec2 velocity;
 	float currentSediment;
+	Vertex()
+	{}
+	Vertex(glm::vec3 pos, glm::vec3 normal, glm::vec2 uv) : pos(pos), normal(normal), uv(uv)
+	{}
 };
 
 class Mesh
 {
 public:
-	Mesh(int width, int length, Shader shader);
-	Mesh(int width, int length, Vertex* vertices, uint32_t vertexCount, uint32_t* indices, uint32_t indexCount, Shader shader);
+	Mesh(Shader shader);
+	Mesh(std::vector<Vertex> vertices, std::vector<uint32_t> indices, Shader shader);
 	~Mesh();
 	virtual void init();
 	void draw();
-	void updateMeshFromMap(HeightMap* heightMap);
-	virtual void updateMeshFromHeights(float*** heights);
 
-	Vertex* vertices;
-	uint32_t vertexCount = 0;
-
-	uint32_t* indices;
-	uint32_t indexCount = 0;
+	std::vector<Vertex> vertices;
+	std::vector<uint32_t> indices;
 	Shader shader;
 protected:
-	int width, length;
-	virtual void calculateVertices(HeightMap* map);
-	virtual void calculateVertices(float*** height);
-	virtual void calculateIndices();
-	virtual void calculateNormals();
 
 
 	void update();

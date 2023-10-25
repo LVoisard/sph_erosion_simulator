@@ -1,7 +1,7 @@
 #include "terrain_mesh.h"
 
 TerrainMesh::TerrainMesh(int width, int length, float*** terrainHeights, Shader shader)
-	:Mesh(width, length, shader)
+	:QuadMesh(width, length, shader)
 {
 	originalHeights = new float[width * length];
 
@@ -20,7 +20,7 @@ TerrainMesh::TerrainMesh(int width, int length, float*** terrainHeights, Shader 
 }
 
 TerrainMesh::TerrainMesh(int width, int length, HeightMap* heightMap, Shader shader)
-	:Mesh(width, length, shader)
+	:QuadMesh(width, length, shader)
 {
 	originalHeights = new float[width * length];
 
@@ -79,10 +79,10 @@ void TerrainMesh::init()
 	glBindVertexArray(VAO);
 
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices[0]) * indexCount, indices, GL_STATIC_DRAW);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices[0]) * indices.size(), indices.data(), GL_STATIC_DRAW);
 
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices[0]) * vertexCount, vertices, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices[0]) * vertices.size(), vertices.data(), GL_STATIC_DRAW);
 
 	glEnableVertexAttribArray(shader.getAttribLocation("pos"));
 	glEnableVertexAttribArray(shader.getAttribLocation("normal"));
