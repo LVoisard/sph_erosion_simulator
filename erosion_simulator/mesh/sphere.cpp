@@ -5,51 +5,8 @@
 Sphere::Sphere(glm::vec3 center, int radius, Shader shader)
 	:Mesh(shader), center(center), radius(radius)
 {
-
- //   vertexCount = 8;
-	//vertices = new Vertex[] {
-
-	//	Vertex(glm::vec3(-1.0f, 1.0f, -1.0f), glm::vec3(0.0f,0.0f,0.0f), glm::vec2(0.0f,0.0f)), // 0
-	//	Vertex(glm::vec3(-1.0f, -1.0f, -1.0f), glm::vec3(0.0f,0.0f,0.0f), glm::vec2(0.0f,0.0f)), // 1
-	//	Vertex(glm::vec3(1.0f, 1.0f, -1.0f), glm::vec3(0.0f,0.0f,0.0f), glm::vec2(0.0f,0.0f)), // 2
-	//	Vertex(glm::vec3(1.0f, -1.0f, -1.0f), glm::vec3(0.0f,0.0f,0.0f), glm::vec2(0.0f,0.0f)), // 3
-
-	//	Vertex(glm::vec3(-1.0f, 1.0f, 1.0f), glm::vec3(0.0f,0.0f,0.0f), glm::vec2(0.0f,0.0f)), // 4
-	//	Vertex(glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(0.0f,0.0f,0.0f), glm::vec2(0.0f,0.0f)), // 5
-	//	Vertex(glm::vec3(-1.0f, -1.0f, 1.0f), glm::vec3(0.0f,0.0f,0.0f), glm::vec2(0.0f,0.0f)), // 6
-	//	Vertex(glm::vec3(1.0f, -1.0f, 1.0f), glm::vec3(0.0f,0.0f,0.0f), glm::vec2(0.0f,0.0f)), // 7
-	//	//-1.0f,  1.0f, -1.0f, // 0
-	//	//-1.0f, -1.0f, -1.0f, // 1
-	//	// 1.0f, -1.0f, -1.0f, // 2
-	//	// 1.0f,  1.0f, -1.0f, // 3
-
-	//	//-1.0f,  1.0f,  1.0f, // 4
-	//	//-1.0f, -1.0f,  1.0f, // 5
-	//	// 1.0f, -1.0f,  1.0f, // 6
-	//	// 1.0f,  1.0f,  1.0f, // 7
-	//};
-
-	//indexCount = 36;
-	//indices = new uint32_t[]{
-	//	// front
-	//	0, 1, 2,
-	//	2, 1, 3,
-	//	// right
-	//	2, 3, 5,
-	//	5, 3, 7,
-	//	// back
-	//	5, 7, 4,
-	//	4, 7, 6,
-	//	// left
-	//	4, 6, 0,
-	//	0, 6, 1,
-	//	// top
-	//	4, 0, 5,
-	//	5, 0, 2,
-	//	// bottom
-	//	1, 6, 3,
-	//	3, 6, 7
-	//};
+    // taken from 
+    // http://www.songho.ca/opengl/gl_sphere.html
 
     float x, y, z, xy;                              // vertex position
     float nx, ny, nz, lengthInv = 1.0f / radius;    // vertex normal
