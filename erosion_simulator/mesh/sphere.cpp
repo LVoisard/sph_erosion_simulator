@@ -1,8 +1,17 @@
 #include "sphere.h"
 #include <iostream>
+#include <algorithm>
 #define PI 3.14159265359
 
-Sphere::Sphere(glm::vec3 center, int radius, Shader shader)
+Sphere::Sphere(Sphere* sphere)
+    :Mesh(sphere->shader), radius(sphere->radius)
+{
+    vertices = sphere->vertices;
+    indices = sphere->indices;
+    center = glm::vec3(0);
+}
+
+Sphere::Sphere(glm::vec3 center, float radius, Shader shader)
 	:Mesh(shader), center(center), radius(radius)
 {
     // taken from 
@@ -12,8 +21,8 @@ Sphere::Sphere(glm::vec3 center, int radius, Shader shader)
     float nx, ny, nz, lengthInv = 1.0f / radius;    // vertex normal
     float s, t;                                     // vertex texCoord
 
-    int sectorCount = 36;
-    int stackCount = 18;
+    int sectorCount = 8;
+    int stackCount = 8;
     float sectorStep = 2 * PI / sectorCount;
     float stackStep = PI / stackCount;
     float sectorAngle, stackAngle;
@@ -87,6 +96,21 @@ Sphere::Sphere(glm::vec3 center, int radius, Shader shader)
             //}
         }
     }
+}
+
+void Sphere::SetPosition(glm::vec3 position)
+{
+    for (int i = 0; i < vertices.size(); i++)
+    {
+        vertices[i].pos += position - center;
+    }
+    center = position;
+    update();
+}
+
+glm::vec3 Sphere::GetPosition()
+{
+    return center;
 }
 
 void Sphere::init()

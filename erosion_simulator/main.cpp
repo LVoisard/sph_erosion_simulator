@@ -62,6 +62,7 @@ HeightMap map(minHeight, maxHeight);
 TerrainMesh* terrainMesh;
 WaterMesh* waterMesh;
 Sphere* sphere;
+std::vector<Sphere*> particles;
 
 ErosionModel* erosionModel;
 SimulationParametersUI* simParams;
@@ -637,7 +638,12 @@ void UpdateShaders(glm::mat4& view, glm::mat4& proj, glm::mat4& model, float& de
 	rockTexture.use(GL_TEXTURE2);
 
 	terrainMesh->draw();
-	sphere->draw();
+	//sphere->draw();
+	for (Sphere* s : particles)
+	{
+		s->draw();
+	}
+
 	mainShader.stop();
 
 	waterShader.use();
@@ -693,11 +699,25 @@ int main(int argc, char* argv[])
 
 	terrainMesh = new TerrainMesh(map.getWidth(), map.getLength(), &erosionModel->terrainHeights, mainShader);
 	waterMesh = new WaterMesh(map.getWidth(), map.getLength(), &erosionModel->terrainHeights, &erosionModel->waterHeights, waterShader);
-	sphere = new Sphere(glm::vec3(0), 1, mainShader);
+	sphere = new Sphere(glm::vec3(0), 0.1, mainShader);
 
 	terrainMesh->init();
 	waterMesh->init();
 	sphere->init();
+
+	for (int x = 0; x < 30; x++)
+	{
+		for (int y = 0; y < 10; y++)
+		{
+			for (int z = 0; z < 30; z++)
+			{
+				Sphere* s = new Sphere(sphere);
+				s->init();
+				s->SetPosition(glm::vec3((float)x / 5, (float) y / 5, (float)z / 5));
+				particles.push_back(s);
+			}
+		}
+	}
 
 	glm::mat4 proj = glm::mat4(1.0f);
 	proj = glm::perspective(glm::radians(fov), window.getAspectRatio(), 0.1f, 1000.0f);
@@ -734,6 +754,11 @@ int main(int argc, char* argv[])
 		glm::mat4 model = glm::mat4(1.0f);
 		glm::mat4 view = camera.getViewMatrix();
 
+		for (int i = 0; i < particles.size(); i++)
+		{
+			glm::vec3 pos = particles[i]->GetPosition();
+			particles[i]->SetPosition(pos + glm::vec3(0, sin(pos.x + pos.z + timePast) * 0.25 * deltaTime, 0));
+		}
 		UpdateShaders(view, proj, model, deltaTime);
 
 		window.Menu(erosionModel, simParams);

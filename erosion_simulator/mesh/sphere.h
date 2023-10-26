@@ -6,7 +6,10 @@
 class Sphere : public Mesh
 {
 public:
-	Sphere(glm::vec3 position, int radius, Shader shader);
+	Sphere(Sphere* sphere);
+	Sphere(glm::vec3 position, float radius, Shader shader);
+	void SetPosition(glm::vec3 position);
+	glm::vec3 GetPosition();
 	virtual void init() override;
 private:
 	glm::vec3 center;
