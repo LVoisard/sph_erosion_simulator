@@ -12,6 +12,7 @@
 #include <chrono>
 #include <mesh/water_mesh.h>
 #include "mesh/sphere.h"
+#include "particle.h"
 #include "external/simpleppm.h"
 
 #include <iostream>
@@ -62,7 +63,7 @@ HeightMap map(minHeight, maxHeight);
 TerrainMesh* terrainMesh;
 WaterMesh* waterMesh;
 Sphere* sphere;
-std::vector<Sphere*> particles;
+std::vector<Particle*> particles;
 
 ErosionModel* erosionModel;
 SimulationParametersUI* simParams;
@@ -638,11 +639,7 @@ void UpdateShaders(glm::mat4& view, glm::mat4& proj, glm::mat4& model, float& de
 	rockTexture.use(GL_TEXTURE2);
 
 	terrainMesh->draw();
-	//sphere->draw();
-	for (Sphere* s : particles)
-	{
-		s->draw();
-	}
+	
 
 	mainShader.stop();
 
@@ -656,6 +653,11 @@ void UpdateShaders(glm::mat4& view, glm::mat4& proj, glm::mat4& model, float& de
 	waterNormalTexture.use();
 	waterShader.setTexture("texture0", GL_TEXTURE0);
 
+	//sphere->draw();
+	for (Particle* p : particles)
+	{
+		p->draw();
+	}
 
 	waterMesh->draw();
 	waterShader.stop();
@@ -699,22 +701,21 @@ int main(int argc, char* argv[])
 
 	terrainMesh = new TerrainMesh(map.getWidth(), map.getLength(), &erosionModel->terrainHeights, mainShader);
 	waterMesh = new WaterMesh(map.getWidth(), map.getLength(), &erosionModel->terrainHeights, &erosionModel->waterHeights, waterShader);
-	sphere = new Sphere(glm::vec3(0), 0.1, mainShader);
+	sphere = new Sphere(glm::vec3(0), 0.1, waterShader);
 
 	terrainMesh->init();
 	waterMesh->init();
 	sphere->init();
 
-	for (int x = 0; x < 30; x++)
+	for (int x = 0; x < map.getWidth() * 2; x++)
 	{
-		for (int y = 0; y < 10; y++)
+		for (int y = 0; y < 1; y++)
 		{
-			for (int z = 0; z < 30; z++)
+			for (int z = 0; z < map.getLength() * 2; z++)
 			{
-				Sphere* s = new Sphere(sphere);
-				s->init();
-				s->SetPosition(glm::vec3((float)x / 5, (float) y / 5, (float)z / 5));
-				particles.push_back(s);
+				Particle* p = new Particle(sphere);
+				p->setPosition(glm::vec3((float)x /2  - (float)map.getWidth() / 2, (float)y, (float)z / 2 - (float)map.getLength() / 2));
+				particles.push_back(p);
 			}
 		}
 	}
@@ -756,8 +757,8 @@ int main(int argc, char* argv[])
 
 		for (int i = 0; i < particles.size(); i++)
 		{
-			glm::vec3 pos = particles[i]->GetPosition();
-			particles[i]->SetPosition(pos + glm::vec3(0, sin(pos.x + pos.z + timePast) * 0.25 * deltaTime, 0));
+			glm::vec3 pos = particles[i]->getPosition();
+			particles[i]->setPosition(pos + glm::vec3(0, sin(pos.x + pos.z + timePast) * 0.25 * deltaTime, 0));
 		}
 		UpdateShaders(view, proj, model, deltaTime);
 

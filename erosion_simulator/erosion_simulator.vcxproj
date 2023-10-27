@@ -157,6 +157,7 @@
     <ClCompile Include="mesh\quad_mesh.cpp" />
     <ClCompile Include="mesh\sphere.cpp" />
     <ClCompile Include="mesh\terrain_mesh.cpp" />
+    <ClCompile Include="particle.cpp" />
     <ClCompile Include="shader\shader.cpp" />
     <ClCompile Include="skybox\skybox.cpp" />
     <ClCompile Include="texture\texture.cpp" />
@@ -181,6 +182,7 @@
     <ClInclude Include="mesh\quad_mesh.h" />
     <ClInclude Include="mesh\sphere.h" />
     <ClInclude Include="mesh\terrain_mesh.h" />
+    <ClInclude Include="particle.h" />
     <ClInclude Include="shader\shader.h" />
     <ClInclude Include="simulation_parameters_ui.h" />
     <ClInclude Include="skybox\skybox.h" />

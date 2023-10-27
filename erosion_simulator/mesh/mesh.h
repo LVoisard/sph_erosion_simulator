@@ -30,10 +30,10 @@ public:
 	std::vector<Vertex> vertices;
 	std::vector<uint32_t> indices;
 	Shader shader;
+	void update();
 protected:
 
 
-	void update();
 	void clearData();
 	uint32_t VAO, VBO, EBO;
 private:

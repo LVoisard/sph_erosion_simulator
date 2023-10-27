@@ -98,21 +98,6 @@ Sphere::Sphere(glm::vec3 center, float radius, Shader shader)
     }
 }
 
-void Sphere::SetPosition(glm::vec3 position)
-{
-    for (int i = 0; i < vertices.size(); i++)
-    {
-        vertices[i].pos += position - center;
-    }
-    center = position;
-    update();
-}
-
-glm::vec3 Sphere::GetPosition()
-{
-    return center;
-}
-
 void Sphere::init()
 {
     glBindVertexArray(VAO);
@@ -126,9 +111,9 @@ void Sphere::init()
     glEnableVertexAttribArray(shader.getAttribLocation("pos"));
     glEnableVertexAttribArray(shader.getAttribLocation("normal"));
     glEnableVertexAttribArray(shader.getAttribLocation("uv"));
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(vertices[0]), (const GLvoid*)(0));
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(vertices[0]), (const GLvoid*)(sizeof(vertices[0].pos)));
-    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(vertices[0]), (const GLvoid*)(sizeof(vertices[0].pos) + sizeof(vertices[0].normal)));
+    glVertexAttribPointer(shader.getAttribLocation("pos"), 3, GL_FLOAT, GL_FALSE, sizeof(vertices[0]), (const GLvoid*)(0));
+    glVertexAttribPointer(shader.getAttribLocation("normal"), 3, GL_FLOAT, GL_FALSE, sizeof(vertices[0]), (const GLvoid*)(sizeof(vertices[0].pos)));
+    glVertexAttribPointer(shader.getAttribLocation("uv"), 2, GL_FLOAT, GL_FALSE, sizeof(vertices[0]), (const GLvoid*)(sizeof(vertices[0].pos) + sizeof(vertices[0].normal)));
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);

@@ -65,11 +65,7 @@ float getBlue(float velocity)
 }
 
 void main()
-{
-	if(fragWaterHeight < minWaterHeight){
-		fragColor = vec4(0);
-		return;
-	}
+{	
 
 	float velocity = length(fragWaterVelocity);
 	// water velocity
@@ -107,11 +103,10 @@ void main()
 	vec4 specularColor = vec4(0.5 * vec3(specularFactor), 1.0);
 	
 
-	baseColor -= vec3(0.1 * min(1, velocity));
 	vec4 base = vec4(baseColor, 1.0);
 
 	fragColor = clamp(base *(diffuseColor + specularColor), 0, 1);
-	fragColor.a = alpha;
+	fragColor.a = 1;
 	
 }
 
