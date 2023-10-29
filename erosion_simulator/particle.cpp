@@ -1,8 +1,8 @@
 #include "particle.h"
 
 
-Particle::Particle(Sphere* sphere)
-    :mesh(sphere), velocity(glm::vec3(0)), position(glm::vec3(0))
+Particle::Particle(glm::vec3 position)
+    :position(position)
 {
 }
 
@@ -14,9 +14,4 @@ void Particle::setPosition(glm::vec3 position)
 glm::vec3 Particle::getPosition()
 {
     return position;
-}
-
-void Particle::draw()
-{
-    mesh->draw();
 }

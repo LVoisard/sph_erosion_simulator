@@ -76,6 +76,17 @@ void Mesh::draw()
 	glBindVertexArray(0);
 }
 
+void Mesh::drawInstanced(int amount)
+{
+	glBindVertexArray(VAO);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+
+	glDrawElementsInstanced(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0, amount);
+
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+	glBindVertexArray(0);
+}
+
 void Mesh::update()
 {
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);	

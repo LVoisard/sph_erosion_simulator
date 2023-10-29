@@ -13,6 +13,7 @@
 #include <mesh/water_mesh.h>
 #include "mesh/sphere.h"
 #include "particle.h"
+#include "particle_generator.h"
 #include "external/simpleppm.h"
 
 #include <iostream>
@@ -63,7 +64,7 @@ HeightMap map(minHeight, maxHeight);
 TerrainMesh* terrainMesh;
 WaterMesh* waterMesh;
 Sphere* sphere;
-std::vector<Particle*> particles;
+ParticleGenerator* sphParticles;
 
 ErosionModel* erosionModel;
 SimulationParametersUI* simParams;
@@ -646,7 +647,6 @@ void UpdateShaders(glm::mat4& view, glm::mat4& proj, glm::mat4& model, float& de
 
 
 	waterShader.use();
-	waterShader.setMat4("model", model);
 	waterShader.setMat4("view", view);
 	waterShader.setMat4("projection", proj);
 	waterShader.setUniformVector3("viewerPosition", camera.getPosition());
@@ -655,12 +655,7 @@ void UpdateShaders(glm::mat4& view, glm::mat4& proj, glm::mat4& model, float& de
 	waterNormalTexture.use();
 	waterShader.setTexture("texture0", GL_TEXTURE0);
 
-	//sphere->draw();
-	for (Particle* p : particles)
-	{
-		waterShader.setUniformVector3("offset", p->getPosition());
-		p->draw();
-	}
+	sphParticles->draw();
 	
 	waterShader.stop();
 }
@@ -709,24 +704,11 @@ int main(int argc, char* argv[])
 	waterMesh->init();
 	sphere->init();
 
-	int numInOneUnit = 2;
-
-	for (int x = 0; x < map.getWidth() * numInOneUnit; x++)
-	{
-		for (int y = 0; y < 1; y++)
-		{
-			for (int z = 0; z < map.getLength() * numInOneUnit; z++)
-			{
-				Particle* p = new Particle(sphere);
-				p->setPosition(glm::vec3((float)x / numInOneUnit - (float)map.getWidth() / 2, (float)y, (float)z / numInOneUnit - (float)map.getLength() / 2));
-				particles.push_back(p);
-			}
-		}
-	}
+	int numInOneUnit = 4;
+	sphParticles = new ParticleGenerator(waterShader, sphere, map.getWidth(), map.getLength(), numInOneUnit);
 
 	glm::mat4 proj = glm::mat4(1.0f);
 	proj = glm::perspective(glm::radians(fov), window.getAspectRatio(), 0.1f, 1000.0f);
-	printf("particle count: %d\n", particles.size());
 	auto currentTime = std::chrono::high_resolution_clock::now();
 	while (!window.shouldWindowClose())
 	{
@@ -759,11 +741,9 @@ int main(int argc, char* argv[])
 		glm::mat4 model = glm::mat4(1.0f);
 		glm::mat4 view = camera.getViewMatrix();
 
-		for (int i = 0; i < particles.size(); i++)
-		{
-			glm::vec3 pos = particles[i]->getPosition();
-			particles[i]->setPosition(pos + glm::vec3(0, sin(pos.x + pos.z + timePast) * 0.25 * deltaTime, 0));
-		}
+		sphParticles->updateParticles(deltaTime, timePast);
+		
+		// drawing
 		UpdateShaders(view, proj, model, deltaTime);
 
 		window.Menu(erosionModel, simParams);

@@ -26,11 +26,13 @@ public:
 	~Mesh();
 	virtual void init();
 	virtual void draw();
+	virtual void drawInstanced(int amount);
 
 	std::vector<Vertex> vertices;
 	std::vector<uint32_t> indices;
 	Shader shader;
 	void update();
+	uint32_t getVAO() { return VAO; }
 protected:
 
 
