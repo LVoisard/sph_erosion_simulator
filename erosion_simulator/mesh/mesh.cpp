@@ -2,7 +2,7 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
-Mesh::Mesh(Shader shader):
+Mesh::Mesh(Shader& shader):
 	shader(shader)
 {
 	glGenVertexArrays(1, &VAO);
@@ -10,7 +10,7 @@ Mesh::Mesh(Shader shader):
 	glGenBuffers(1, &VBO);
 }
 
-Mesh::Mesh(std::vector<Vertex> vertices, std::vector<uint32_t> indices, Shader shader)
+Mesh::Mesh(std::vector<Vertex> vertices, std::vector<uint32_t> indices, Shader& shader)
 	: vertices(vertices), indices(indices), shader(shader)
 {
 	glGenVertexArrays(1, &VAO);

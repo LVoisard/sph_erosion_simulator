@@ -9,6 +9,7 @@ public:
 	Sphere(Sphere* sphere);
 	Sphere(glm::vec3 position, float radius, Shader shader);
 	virtual void init() override;
+	virtual void draw() override;
 private:
 	glm::vec3 center;
 	int radius;

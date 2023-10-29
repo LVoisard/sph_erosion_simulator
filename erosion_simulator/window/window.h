@@ -6,6 +6,7 @@
 #include "GLFW/glfw3.h"
 #include "erosion_model.h"
 #include "simulation_parameters_ui.h"
+#include <string>
 
 const int SIMULATION_PARAMETER_WINDOW_WIDTH = 600;
 
@@ -18,6 +19,8 @@ public:
 	void updateInput();
 
 	GLFWwindow* getGlfwWindow() { return glfwWindow; }
+
+	void updateTitle(const char* title) { glfwSetWindowTitle(this->glfwWindow, title); }
 	bool shouldWindowClose() { return glfwWindowShouldClose(glfwWindow); }
 	void swapBuffers() { glfwSwapBuffers(glfwWindow); }
 	void pollEvents() { glfwPollEvents(); }

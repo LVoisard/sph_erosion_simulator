@@ -643,6 +643,7 @@ void UpdateShaders(glm::mat4& view, glm::mat4& proj, glm::mat4& model, float& de
 
 	mainShader.stop();
 
+
 	waterShader.use();
 	waterShader.setMat4("model", model);
 	waterShader.setMat4("view", view);
@@ -656,10 +657,10 @@ void UpdateShaders(glm::mat4& view, glm::mat4& proj, glm::mat4& model, float& de
 	//sphere->draw();
 	for (Particle* p : particles)
 	{
+		waterShader.setUniformVector3("offset", p->getPosition());
 		p->draw();
 	}
-
-	waterMesh->draw();
+	
 	waterShader.stop();
 }
 
@@ -722,7 +723,7 @@ int main(int argc, char* argv[])
 
 	glm::mat4 proj = glm::mat4(1.0f);
 	proj = glm::perspective(glm::radians(fov), window.getAspectRatio(), 0.1f, 1000.0f);
-
+	printf("particle count: %d\n", particles.size());
 	auto currentTime = std::chrono::high_resolution_clock::now();
 	while (!window.shouldWindowClose())
 	{
@@ -732,13 +733,13 @@ int main(int argc, char* argv[])
 		currentTime = newTime;
 		timePast += deltaTime;
 
+		window.updateTitle(std::string("Erosion Simulation | FPS: " + std::to_string((float)1 /deltaTime)).c_str());
 		HandleHeightmapResets();
 		// stop taking input
 		if (!window.showSaveMenu) {
 			HandleKeyboardInputs();
 			HandleCamera(deltaTime);
 		}
-
 		if (erosionModel->isModelRunning)
 		{
 			//printf("Frame time: %f\n", deltaTime);

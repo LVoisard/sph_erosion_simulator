@@ -21,11 +21,11 @@ struct Vertex
 class Mesh
 {
 public:
-	Mesh(Shader shader);
-	Mesh(std::vector<Vertex> vertices, std::vector<uint32_t> indices, Shader shader);
+	Mesh(Shader& shader);
+	Mesh(std::vector<Vertex> vertices, std::vector<uint32_t> indices, Shader& shader);
 	~Mesh();
 	virtual void init();
-	void draw();
+	virtual void draw();
 
 	std::vector<Vertex> vertices;
 	std::vector<uint32_t> indices;

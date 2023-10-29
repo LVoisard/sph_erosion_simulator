@@ -15,7 +15,6 @@ void Particle::setPosition(glm::vec3 position)
         mesh->vertices[i].pos += position - this->position;
     }
     this->position = position;
-    mesh->update();
 }
 
 glm::vec3 Particle::getPosition()
