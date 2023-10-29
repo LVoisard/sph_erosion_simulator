@@ -161,8 +161,9 @@ void addPrecipitation(float dt) {
 			if (erosionModel->waterHeights[x][y] + erosionModel->terrainHeights[x][y] < erosionModel->seaLevel)
 				erosionModel->waterHeights[x][y] += dt;
 			if (erosionModel->isRaining) {
-				if (distr(gen) <= erosionModel->rainAmount * erosionModel->width)
+				if (distr(gen) <= erosionModel->rainAmount * erosionModel->width) {
 					erosionModel->waterHeights[x][y] += dt * erosionModel->rainIntensity * erosionModel->simulationSpeed;
+				}
 			}
 
 			for (WaterSource waterSource : erosionModel->waterSources)
@@ -708,14 +709,16 @@ int main(int argc, char* argv[])
 	waterMesh->init();
 	sphere->init();
 
-	for (int x = 0; x < map.getWidth() * 2; x++)
+	int numInOneUnit = 2;
+
+	for (int x = 0; x < map.getWidth() * numInOneUnit; x++)
 	{
 		for (int y = 0; y < 1; y++)
 		{
-			for (int z = 0; z < map.getLength() * 2; z++)
+			for (int z = 0; z < map.getLength() * numInOneUnit; z++)
 			{
 				Particle* p = new Particle(sphere);
-				p->setPosition(glm::vec3((float)x /2  - (float)map.getWidth() / 2, (float)y, (float)z / 2 - (float)map.getLength() / 2));
+				p->setPosition(glm::vec3((float)x / numInOneUnit - (float)map.getWidth() / 2, (float)y, (float)z / numInOneUnit - (float)map.getLength() / 2));
 				particles.push_back(p);
 			}
 		}
