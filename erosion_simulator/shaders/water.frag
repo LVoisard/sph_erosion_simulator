@@ -5,9 +5,6 @@
 in vec3 fragNormal;
 in vec3 fragPos;
 in vec2 texCoord;
-in float fragWaterHeight;
-in vec2 fragWaterVelocity;
-in float fragSediment;
 
 
 float minWaterHeight = 0.15;
@@ -67,7 +64,7 @@ float getBlue(float velocity)
 void main()
 {	
 
-	float velocity = length(fragWaterVelocity);
+	float velocity = 0;
 	// water velocity
 	if(waterDebugMode == 1) {
 		fragColor = vec4(getRed(velocity), getGreen(velocity), getBlue(velocity), 1);
@@ -76,7 +73,7 @@ void main()
 	// sediment transportation
 	else if (waterDebugMode == 2)
 	{
-		fragColor = vec4(3 * fragSediment, 0,0,1);
+		fragColor = vec4(0, 0,0,1);
 		return;
 	}
 	// invisible
@@ -87,9 +84,6 @@ void main()
 	}
 
 	vec3 baseColor = vec3(15.0 / 256, 94.0 / 256, 156.0 / 256.0);
-
-	float a = smoothstep(minWaterHeight, maxWaterHeight, fragWaterHeight);
-	float alpha = mix(minWaterOpacity, maxWaterOpacity, a);
 
 	vec3 normalMap = texture(texture0, texCoord).rbg * 2.0 - 1.0;
 	vec3 normal = normalize(fragNormal + normalMap);
