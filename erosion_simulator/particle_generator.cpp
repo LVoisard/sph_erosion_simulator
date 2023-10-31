@@ -3,17 +3,22 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <exception>
 
-ParticleGenerator::ParticleGenerator(Shader& shader, Mesh* mesh, int mapWidth, int mapLength, int numPerSquare)
-	:shader(shader), particleMesh(mesh), width(mapWidth), height(4), length(mapLength)
+ParticleGenerator::ParticleGenerator(Shader& shader, Mesh* mesh, int mapWidth, int mapLength, int maxHeight, int height, float cellSize, int numPerSquare)
+	:shader(shader), particleMesh(mesh), width(mapWidth), height(height), length(mapLength)
 {
 	int particleId = 0;
-	for (int x = 0; x < width * numPerSquare; x++)
+	std::cout << " height " << width << std::endl;
+	for (int x = 0; x < width / cellSize * numPerSquare; x++)
 	{
-		for (int y = 0; y < height * numPerSquare; y++)
+		for (int y = 0; y < (4 * numPerSquare); y++)
 		{
-			for (int z = 0; z < length * numPerSquare; z++)
+			for (int z = 0; z < length / cellSize * numPerSquare; z++)
 			{
-				glm::vec3 pos((float)x / numPerSquare - (float)mapWidth / 2, (float)y / numPerSquare - (float)height / 2, (float)z / numPerSquare - (float)mapLength / 2);
+				//((maxHeight - y) + (float) (y * cellSize / 2 / (numPerSquare)) - (cellSize / 2 / (numPerSquare)))
+				glm::vec3 pos(
+					(float)x * cellSize / (numPerSquare) - (float)mapWidth / 2 + (cellSize / 2 / (numPerSquare)) ,
+					(float)((maxHeight - y * cellSize / numPerSquare)) - (cellSize / 2 / (numPerSquare)),
+					(float)z * cellSize / (numPerSquare) - (float)mapLength / 2 + (cellSize / 2 / (numPerSquare)));
 				Particle* p = new Particle(pos, particleId++);
 				particles.push_back(p);
 				particleModels.push_back(glm::translate(glm::mat4(1), p->getPosition()));
@@ -37,7 +42,7 @@ ParticleGenerator::ParticleGenerator(Shader& shader, Mesh* mesh, int mapWidth, i
 	glEnableVertexAttribArray(6);
 
 	glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (void*)0);
-	glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (void*)(sizeof(glm::vec4)));
+	glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (void*)(1 * sizeof(glm::vec4)));
 	glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (void*)(2 * sizeof(glm::vec4)));
 	glVertexAttribPointer(6, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (void*)(3 * sizeof(glm::vec4)));
 
@@ -66,7 +71,7 @@ ParticleGenerator::ParticleGenerator(Shader& shader, Mesh* mesh, int mapWidth, i
 
 	glBindVertexArray(0);
 
-	grid = Grid3D(mapWidth, mapLength, height, 1, particles, shader);
+	grid = Grid3D(mapWidth, mapLength, height, cellSize, particles, shader);
 
 	std::cout << "Generated " << particles.size() << " particles" << std::endl;
 }
@@ -92,17 +97,19 @@ void ParticleGenerator::updateParticles(float deltaTime, float time)
 		
 		// update particle
 		glm::vec3 pos = particles[i]->getPosition();
-		particles[i]->setPosition(pos + glm::vec3(0, sin(pos.x + pos.z + time) * 0.25 * deltaTime, 0));
+		particles[i]->setPosition(pos + glm::vec3(0, sin(pos.x + pos.z + time) * 0.25 * deltaTime - deltaTime, 0));
 		
 		// search for neighbours
 		std::vector<Particle*> cells = grid.getNeighbouringPaticlesInRadius(particles[i]);
 
 		//after updating particle position
 		Cell* currentCell = grid.getCellFromPosition(particles[i]->getPosition());
-		if (previousCell != nullptr && currentCell != nullptr && previousCell != grid.getCellFromPosition(particles[i]->getPosition()))
+		if (previousCell != currentCell)
 		{
-			previousCell->removeParticle(particles[i]);
-			currentCell->addParticle(particles[i]);
+			if (previousCell != nullptr)
+				previousCell->removeParticle(particles[i]);
+			if(currentCell != nullptr)
+				currentCell->addParticle(particles[i]);
 		}
 
 		particleModels[i] = glm::translate(glm::mat4(1.0), particles[i]->getPosition());
@@ -120,9 +127,9 @@ void ParticleGenerator::updateParticles(float deltaTime, float time)
 			particleDebugs[i].isNearestNeighbourTarget = false;
 		}
 
-		Cell* cell = grid.getCellFromPosition(particles[280]->getPosition());
-		std::vector<Particle*> parts = grid.getNeighbouringPaticlesInRadius(particles[280]);
-		particleDebugs[280].isNearestNeighbourTarget = true;
+		Cell* cell = grid.getCellFromPosition(particles[particleID]->getPosition());
+		std::vector<Particle*> parts = grid.getNeighbouringPaticlesInRadius(particles[particleID]);
+		particleDebugs[particleID].isNearestNeighbourTarget = true;
 		for (int i = 0; i < parts.size(); i++)
 		{
 			particleDebugs[parts[i]->getId()].isNearestNeighbour = true;

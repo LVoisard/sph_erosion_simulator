@@ -714,8 +714,10 @@ int main(int argc, char* argv[])
 	waterMesh->init();
 	sphere->init();
 
-	int numInOneUnit = 1;
-	sphParticles = new ParticleGenerator(defaultShader, sphere, map.getWidth() - 1, map.getLength() - 1, numInOneUnit);
+	float cellSize = 1;
+	// this is cubed (3 = 27 in one cube)
+	int numInOneCell = 1;
+	sphParticles = new ParticleGenerator(defaultShader, sphere, map.getWidth() - 1, map.getLength() - 1, map.getMaxHeight(), map.getHeight(),cellSize, numInOneCell);
 
 	glm::mat4 proj = glm::mat4(1.0f);
 	proj = glm::perspective(glm::radians(fov), window.getAspectRatio(), 0.1f, 1000.0f);

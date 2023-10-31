@@ -19,7 +19,11 @@ Grid3D::Grid3D(int width, int length, int height, float cellSize, std::vector<Pa
 			cells[x][y] = new Cell*[this->length];
 			for (int z = 0; z < this->length; z++)
 			{
-				cells[x][y][z] = new Cell(x,y,z, glm::vec3(x - this->width / 2, y - this->height / 2, z - this->length / 2) * cellSize, cellSize, false, shader);
+				cells[x][y][z] = new Cell(x,y,z, 
+					glm::vec3(
+						x - this->width / 2, 
+						y - this->height / 2, 
+						z - this->length / 2) * cellSize, cellSize, false, shader);
 			}
 		}
 	}
@@ -99,11 +103,13 @@ Cell* Grid3D::getCellFromPosition(glm::vec3 pos)
 	float sizeX = width / cellSize;
 	float sizeY = height / cellSize;
 	float sizeZ = length / cellSize;
-	int x = ((pos.x + (float)(width / 2)));
-	int y = ((pos.y + (float)(height / 2)));
-	int z = ((pos.z + (float)(length / 2)));
+	int x = ((pos.x / cellSize + (float)(width / 2)));
+	int y = ((pos.y / cellSize + (float)(height / 2)));
+	int z = ((pos.z / cellSize + (float)(length / 2)));
 
-	if (x < 0 || x >= width / cellSize || y < 0 || y >= height / cellSize || z < 0 || z >= length / cellSize) return nullptr;
+	if (x < 0 || x >= width || y < 0 || y >= height || z < 0 || z >= length) { 
+		// std::cout << "outside : " << x << ", " << y << ", " << z << std::endl;
+		return nullptr; }
 	
 	return cells[x][y][z];
 }
@@ -155,7 +161,7 @@ std::vector<Particle*> Grid3D::getNeighbouringPaticlesInRadius(Particle* particl
 	for (int i = 0; i < current->particles.size(); i++)
 	{
 		if (current->particles[i]->getId() != particle->getId() &&
-			glm::distance(current->particles[i]->getPosition(), particle->getPosition()) < particleSearchRadius + 0.05)
+			glm::distance(current->particles[i]->getPosition(), particle->getPosition()) <= particleSearchRadius + 0.1)
 			parts.push_back(current->particles[i]);
 	}
 
@@ -163,7 +169,7 @@ std::vector<Particle*> Grid3D::getNeighbouringPaticlesInRadius(Particle* particl
 	{
 		for (int j = 0; j < cells[i]->particles.size(); j++)
 		{
-			if(glm::distance(particle->getPosition(), cells[i]->particles[j]->getPosition()) <= particleSearchRadius + 0.05)
+			if(glm::distance(particle->getPosition(), cells[i]->particles[j]->getPosition()) <= particleSearchRadius + 0.1)
 				parts.push_back(cells[i]->particles[j]);
 		}
 	}

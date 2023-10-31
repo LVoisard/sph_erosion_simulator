@@ -21,6 +21,9 @@ public:
 	double samplePoint(int x, int y) { return heightMap[x][y]; }
 	double getRGBA(int x, int y) { return std::clamp((double)heightMap[x][y] + minHeight / (double)maxHeight + minHeight, 0.0, 1.0); }
 	int getMaxHeight() { return maxHeight; }
+	int getMinHeight() { return minHeight; }
+	int getHeight() { return maxHeight - minHeight; }
+
 
 
 private:

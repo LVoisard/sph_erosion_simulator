@@ -18,7 +18,7 @@ struct ParticleDebug {
 class ParticleGenerator
 {
 public:
-	ParticleGenerator(Shader& shader, Mesh* mesh, int mapWidth, int mapLength, int numPerSquare);
+	ParticleGenerator(Shader& shader, Mesh* mesh, int mapWidth, int mapLength, int maxHeight, int height,float cellSize, int numPerSquare);
 	void drawParticles();
 	void drawGridDebug();
 	void updateParticles(float deltaTime, float time);
@@ -29,8 +29,8 @@ private:
 	int length;
 
 	// instanced array
-	uint32_t buffer;
-	uint32_t annBuffer;
+	uint32_t buffer = 0;
+	uint32_t annBuffer = 0;
 
 	std::vector<Particle*> particles;
 	std::vector<glm::mat4> particleModels;
