@@ -96,6 +96,9 @@
     <ClCompile Include="particle_generator.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="grid_3d.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="height_map\height_map.h">
@@ -173,6 +176,9 @@
     <ClInclude Include="particle_generator.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="grid_3d.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="shaders\main.vert" />
@@ -181,5 +187,7 @@
     <None Include="shaders\skybox.frag" />
     <None Include="shaders\water.vert" />
     <None Include="shaders\water.frag" />
+    <None Include="shaders\default.vert" />
+    <None Include="shaders\default.frag" />
   </ItemGroup>
 </Project>

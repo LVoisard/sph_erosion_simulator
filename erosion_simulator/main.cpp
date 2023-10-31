@@ -32,6 +32,7 @@ float waterflowRate = 0.1f;
 Window window(SCR_WIDTH, SCR_HEIGHT);
 Shader mainShader("shaders/main.vert", "shaders/main.frag");
 Shader waterShader("shaders/water.vert", "shaders/water.frag");
+Shader defaultShader("shaders/default.vert", "shaders/default.frag");
 Camera camera(&window, 5.0f, .25f, .5f);
 
 Texture grassTexture("textures/grass.jpg");
@@ -655,9 +656,18 @@ void UpdateShaders(glm::mat4& view, glm::mat4& proj, glm::mat4& model, float& de
 	waterNormalTexture.use();
 	waterShader.setTexture("texture0", GL_TEXTURE0);
 
-	sphParticles->draw();
-	
+	sphParticles->drawParticles();
 	waterShader.stop();
+
+	if (false) {
+		defaultShader.use();
+		defaultShader.setMat4("view", view);
+		defaultShader.setMat4("projection", proj);
+		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+		sphParticles->drawGridDebug();
+		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+	}
+	
 }
 
 int main(int argc, char* argv[])
@@ -704,12 +714,15 @@ int main(int argc, char* argv[])
 	waterMesh->init();
 	sphere->init();
 
-	int numInOneUnit = 4;
-	sphParticles = new ParticleGenerator(waterShader, sphere, map.getWidth(), map.getLength(), numInOneUnit);
+	float cellSize = 1;
+	// this is cubed (3 = 27 in one cube)
+	int numInOneCell = 1;
+	sphParticles = new ParticleGenerator(defaultShader, sphere, map.getWidth() - 1, map.getLength() - 1, map.getMaxHeight(), map.getHeight(),cellSize, numInOneCell);
 
 	glm::mat4 proj = glm::mat4(1.0f);
 	proj = glm::perspective(glm::radians(fov), window.getAspectRatio(), 0.1f, 1000.0f);
 	auto currentTime = std::chrono::high_resolution_clock::now();
+	float fpsTimer = 0;
 	while (!window.shouldWindowClose())
 	{
 		auto newTime = std::chrono::high_resolution_clock::now();
@@ -718,7 +731,12 @@ int main(int argc, char* argv[])
 		currentTime = newTime;
 		timePast += deltaTime;
 
-		window.updateTitle(std::string("Erosion Simulation | FPS: " + std::to_string((float)1 /deltaTime)).c_str());
+		if (fpsTimer > 0.25f) {
+			window.updateTitle(std::string("Erosion Simulation | FPS: " + std::to_string((float)1 / deltaTime)).c_str());
+			fpsTimer = 0;
+		}
+		fpsTimer += deltaTime;
+			
 		HandleHeightmapResets();
 		// stop taking input
 		if (!window.showSaveMenu) {

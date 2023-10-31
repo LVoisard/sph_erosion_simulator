@@ -1,8 +1,8 @@
 #include "particle.h"
 
 
-Particle::Particle(glm::vec3 position)
-    :position(position)
+Particle::Particle(glm::vec3 position, int id)
+    :position(position), id(id)
 {
 }
 
