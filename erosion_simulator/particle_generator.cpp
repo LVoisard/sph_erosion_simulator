@@ -1,6 +1,7 @@
 #include "particle_generator.h"
 #include <iostream>
 #include <glm/gtc/matrix_transform.hpp>
+#include <exception>
 
 ParticleGenerator::ParticleGenerator(Shader& shader, Mesh* mesh, int mapWidth, int mapLength, int numPerSquare)
 	:shader(shader), particleMesh(mesh), width(mapWidth), height(4), length(mapLength)
@@ -20,8 +21,6 @@ ParticleGenerator::ParticleGenerator(Shader& shader, Mesh* mesh, int mapWidth, i
 			}
 		}
 	}
-
-
 
 	unsigned int VAO = particleMesh->getVAO();
 
@@ -88,11 +87,25 @@ void ParticleGenerator::updateParticles(float deltaTime, float time)
 {
 	for (int i = 0; i < particles.size(); i++)
 	{
+		// before updating particle position
+		Cell* previousCell = grid.getCellFromPosition(particles[i]->getPosition());
+		
+		// update particle
 		glm::vec3 pos = particles[i]->getPosition();
 		particles[i]->setPosition(pos + glm::vec3(0, sin(pos.x + pos.z + time) * 0.25 * deltaTime, 0));
-		particleModels[i] = glm::translate(glm::mat4(1.0), particles[i]->getPosition());
+		
+		// search for neighbours
+		std::vector<Particle*> cells = grid.getNeighbouringPaticlesInRadius(particles[i]);
 
-		// std::vector<Particle*> cells = grid.getNeighbouringPaticlesInRadius(particles[i], 1.f);
+		//after updating particle position
+		Cell* currentCell = grid.getCellFromPosition(particles[i]->getPosition());
+		if (previousCell != nullptr && currentCell != nullptr && previousCell != grid.getCellFromPosition(particles[i]->getPosition()))
+		{
+			previousCell->removeParticle(particles[i]);
+			currentCell->addParticle(particles[i]);
+		}
+
+		particleModels[i] = glm::translate(glm::mat4(1.0), particles[i]->getPosition());
 	}
 	int x = iter % width;
 	int z = (iter / width) % length;
@@ -107,11 +120,12 @@ void ParticleGenerator::updateParticles(float deltaTime, float time)
 			particleDebugs[i].isNearestNeighbourTarget = false;
 		}
 
-		Cell* cell = grid.getCellFromPosition(particles[164]->getPosition());
-		particleDebugs[164].isNearestNeighbourTarget = true;
-		for (int i = 0; i < cell->particles.size(); i++)
+		Cell* cell = grid.getCellFromPosition(particles[280]->getPosition());
+		std::vector<Particle*> parts = grid.getNeighbouringPaticlesInRadius(particles[280]);
+		particleDebugs[280].isNearestNeighbourTarget = true;
+		for (int i = 0; i < parts.size(); i++)
 		{
-			particleDebugs[cell->particles[i]->getId()].isNearestNeighbour = true;
+			particleDebugs[parts[i]->getId()].isNearestNeighbour = true;
 		}
 		timePast = 0;
 		iter++;

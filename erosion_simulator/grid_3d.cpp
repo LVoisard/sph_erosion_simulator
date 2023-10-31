@@ -28,7 +28,7 @@ Grid3D::Grid3D(int width, int length, int height, float cellSize, std::vector<Pa
 	{
 		Cell* cell = getCellFromPosition(particles[i]->getPosition());
 		if (cell != nullptr)
-			cell->particles.push_back(particles[i]);
+			cell->addParticle(particles[i]);
 	}
 
 	std::vector<Vertex> vertices = {
@@ -155,7 +155,7 @@ std::vector<Particle*> Grid3D::getNeighbouringPaticlesInRadius(Particle* particl
 	for (int i = 0; i < current->particles.size(); i++)
 	{
 		if (current->particles[i]->getId() != particle->getId() &&
-			glm::distance(current->particles[i]->getPosition(), particle->getPosition()) < particleSearchRadius)
+			glm::distance(current->particles[i]->getPosition(), particle->getPosition()) < particleSearchRadius + 0.05)
 			parts.push_back(current->particles[i]);
 	}
 
@@ -163,7 +163,7 @@ std::vector<Particle*> Grid3D::getNeighbouringPaticlesInRadius(Particle* particl
 	{
 		for (int j = 0; j < cells[i]->particles.size(); j++)
 		{
-			if(glm::distance(particle->getPosition(), cells[i]->particles[j]->getPosition()) <= particleSearchRadius)
+			if(glm::distance(particle->getPosition(), cells[i]->particles[j]->getPosition()) <= particleSearchRadius + 0.05)
 				parts.push_back(cells[i]->particles[j]);
 		}
 	}
@@ -173,5 +173,21 @@ std::vector<Particle*> Grid3D::getNeighbouringPaticlesInRadius(Particle* particl
 Cell::Cell(int x, int y, int z, glm::vec3 pos, float size, bool debug, Shader& shader)
 	:x(x), y(y), z(z), pos(pos), size(size), shader(shader)
 {
+}
+
+void Cell::removeParticle(Particle* p)
+{
+	for (int i = 0; i < particles.size(); i++)
+	{
+		if (particles[i] == p) {
+			particles.erase(particles.begin() + i);
+			break;
+		}
+	}
+}
+
+void Cell::addParticle(Particle* p)
+{
+	particles.push_back(p);
 }
 

@@ -10,8 +10,11 @@ public:
 	int x, y, z;
 	glm::vec3 pos;
 	float size;
+	void removeParticle(Particle* p);
+	void addParticle(Particle* p);
 	std::vector<Particle*> particles;
 private:
+
 	std::vector<Cell*> neighbours;
 	Shader shader;
 	Mesh* debugMesh;
