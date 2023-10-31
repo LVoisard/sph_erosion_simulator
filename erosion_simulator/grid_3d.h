@@ -25,10 +25,11 @@ public:
 	void draw();
 	Cell* getCellFromPosition(glm::vec3 pos);
 	std::vector<Cell*> getCellNeighbours(Cell* cell);
-	std::vector<Particle*> getNeighbouringPaticlesInRadius(Particle* particle, float radius);
+	std::vector<Particle*> getNeighbouringPaticlesInRadius(Particle* particle);
 	Cell**** cells;
 private:
 	Shader shader;
+	float particleSearchRadius;
 	int width, length, height;
 	float cellSize;
 	Mesh* debugMesh;

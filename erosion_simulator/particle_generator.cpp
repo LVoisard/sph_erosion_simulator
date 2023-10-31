@@ -107,11 +107,11 @@ void ParticleGenerator::updateParticles(float deltaTime, float time)
 			particleDebugs[i].isNearestNeighbourTarget = false;
 		}
 
-		std::vector<Particle*> parts = grid.getNeighbouringPaticlesInRadius(particles[particleID], 1.25f);
-		particleDebugs[particleID].isNearestNeighbourTarget = true;
-		for (int i = 0; i < parts.size(); i++)
+		Cell* cell = grid.getCellFromPosition(particles[164]->getPosition());
+		particleDebugs[164].isNearestNeighbourTarget = true;
+		for (int i = 0; i < cell->particles.size(); i++)
 		{
-			particleDebugs[parts[i]->getId()].isNearestNeighbour = true;
+			particleDebugs[cell->particles[i]->getId()].isNearestNeighbour = true;
 		}
 		timePast = 0;
 		iter++;

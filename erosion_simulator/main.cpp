@@ -659,7 +659,7 @@ void UpdateShaders(glm::mat4& view, glm::mat4& proj, glm::mat4& model, float& de
 	sphParticles->drawParticles();
 	waterShader.stop();
 
-	if (false) {
+	if (true) {
 		defaultShader.use();
 		defaultShader.setMat4("view", view);
 		defaultShader.setMat4("projection", proj);
@@ -714,8 +714,8 @@ int main(int argc, char* argv[])
 	waterMesh->init();
 	sphere->init();
 
-	int numInOneUnit = 1;
-	sphParticles = new ParticleGenerator(defaultShader, sphere, map.getWidth(), map.getLength(), numInOneUnit);
+	int numInOneUnit = 2;
+	sphParticles = new ParticleGenerator(defaultShader, sphere, map.getWidth() - 1, map.getLength() - 1, numInOneUnit);
 
 	glm::mat4 proj = glm::mat4(1.0f);
 	proj = glm::perspective(glm::radians(fov), window.getAspectRatio(), 0.1f, 1000.0f);
