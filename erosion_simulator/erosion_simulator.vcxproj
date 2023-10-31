@@ -151,6 +151,7 @@
     <ClCompile Include="external\imgui\imgui_tables.cpp" />
     <ClCompile Include="external\imgui\imgui_widgets.cpp" />
     <ClCompile Include="external\simpleppm.cpp" />
+    <ClCompile Include="grid_3d.cpp" />
     <ClCompile Include="height_map\height_map.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="mesh\mesh.cpp" />
@@ -178,6 +179,7 @@
     <ClInclude Include="external\imgui\imstb_textedit.h" />
     <ClInclude Include="external\imgui\imstb_truetype.h" />
     <ClInclude Include="external\simpleppm.h" />
+    <ClInclude Include="grid_3d.h" />
     <ClInclude Include="height_map\height_map.h" />
     <ClInclude Include="mesh\mesh.h" />
     <ClInclude Include="mesh\quad_mesh.h" />
@@ -193,6 +195,8 @@
     <ClInclude Include="window\window.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="shaders\default.frag" />
+    <None Include="shaders\default.vert" />
     <None Include="shaders\main.frag" />
     <None Include="shaders\main.vert" />
     <None Include="shaders\skybox.frag" />

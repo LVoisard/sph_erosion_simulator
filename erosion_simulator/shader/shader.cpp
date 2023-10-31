@@ -6,6 +6,10 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+Shader::Shader()
+{
+}
+
 Shader::Shader(const char* vertexShaderFilePath, const char* fragmentShaderFilePath)
 {
     ID = glCreateProgram();

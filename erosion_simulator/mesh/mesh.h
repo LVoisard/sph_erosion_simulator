@@ -21,6 +21,7 @@ struct Vertex
 class Mesh
 {
 public:
+	Mesh();
 	Mesh(Shader& shader);
 	Mesh(std::vector<Vertex> vertices, std::vector<uint32_t> indices, Shader& shader);
 	~Mesh();

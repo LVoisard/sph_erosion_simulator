@@ -2,6 +2,10 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
+Mesh::Mesh()
+{
+}
+
 Mesh::Mesh(Shader& shader):
 	shader(shader)
 {

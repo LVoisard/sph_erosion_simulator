@@ -5,6 +5,8 @@
 in vec3 fragNormal;
 in vec3 fragPos;
 in vec2 texCoord;
+flat in int fragIsTarget;
+flat in int fragIsNeighbour;
 
 
 float minWaterHeight = 0.15;
@@ -62,7 +64,7 @@ float getBlue(float velocity)
 }
 
 void main()
-{	
+{
 
 	float velocity = 0;
 	// water velocity
@@ -80,6 +82,18 @@ void main()
 	else if( waterDebugMode == 3)
 	{
 		fragColor = vec4(0);
+		return;
+	}
+
+	if(fragIsTarget != 0)
+	{
+		fragColor = vec4(1, 0, 0, 1);
+		return;
+	}
+
+	if(fragIsNeighbour != 0)
+	{
+		fragColor = vec4(0, 1, 0, 1);
 		return;
 	}
 
