@@ -5,13 +5,14 @@
 class HeightMap
 {
 public:
+	HeightMap();
 	HeightMap(double minHeight, double maxHeight);
 	void createProceduralHeightMap(int size, double random);
 	void loadHeightMapFromFile(std::string);
 	void loadHeightMapFromOBJFile(std::string, float heightDiff);
 	void setHeightRange(double minHeight, double maxHeight);
 	void setRandomRange(double random);
-	double** getHeightMap() { return heightMap; }
+	float** getHeightMap() { return heightMap; }
 	int getWidth() { return width; }
 	int getLength() { return length; }
 	void printMap();
@@ -25,6 +26,7 @@ public:
 	int getHeight() { return maxHeight - minHeight; }
 
 
+	float** heightMap;
 
 private:
 	void init();
@@ -33,7 +35,6 @@ private:
 	void squareStep(int chunkSize, int halfChunkSize);
 	void diamondStep(int chunkSize, int halfChunkSize);
 
-	double** heightMap;
 
 	int width;
 	int length;

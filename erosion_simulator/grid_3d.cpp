@@ -1,5 +1,6 @@
 #include "grid_3d.h"
 #include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtx/norm.hpp>
 #include <iostream>
 
 Grid3D::Grid3D()
@@ -161,7 +162,7 @@ std::vector<Particle*> Grid3D::getNeighbouringPaticlesInRadius(Particle* particl
 	for (int i = 0; i < current->particles.size(); i++)
 	{
 		if (current->particles[i]->getId() != particle->getId() &&
-			glm::distance(current->particles[i]->getPosition(), particle->getPosition()) <= particleSearchRadius + 0.1)
+			glm::distance2(current->particles[i]->getPosition(), particle->getPosition()) <= particleSearchRadius * particleSearchRadius)
 			parts.push_back(current->particles[i]);
 	}
 
@@ -169,7 +170,7 @@ std::vector<Particle*> Grid3D::getNeighbouringPaticlesInRadius(Particle* particl
 	{
 		for (int j = 0; j < cells[i]->particles.size(); j++)
 		{
-			if(glm::distance(particle->getPosition(), cells[i]->particles[j]->getPosition()) <= particleSearchRadius + 0.1)
+			if(glm::distance2(particle->getPosition(), cells[i]->particles[j]->getPosition()) <= particleSearchRadius * particleSearchRadius)
 				parts.push_back(cells[i]->particles[j]);
 		}
 	}

@@ -16,6 +16,10 @@
 #include <unordered_map>
 
 
+HeightMap::HeightMap()
+{
+}
+
 HeightMap::HeightMap(double minHeight, double maxHeight)
 	:minHeight(minHeight), maxHeight(maxHeight)
 {
@@ -44,9 +48,9 @@ void HeightMap::loadHeightMapFromFile(std::string fileName)
 	this->width = width;
 	this->length = height;
 
-	heightMap = new double* [width];
+	heightMap = new float* [width];
 	for (int i = 0; i < width; i++) {
-		heightMap[i] = new double[height];
+		heightMap[i] = new float[height];
 	}
 
 	for (int y = 0; y < height; y++)
@@ -115,9 +119,9 @@ void HeightMap::loadHeightMapFromOBJFile(std::string fileName, float heightDiff)
 	this->width = width;
 	this->length = length;
 
-	heightMap = new double* [width];
+	heightMap = new float* [width];
 	for (int i = 0; i < width; i++) {
-		heightMap[i] = new double[length];
+		heightMap[i] = new float[length];
 	}
 
 	for (int y = 0; y < length; y++)
@@ -197,18 +201,18 @@ void HeightMap::generateHeightMap()
 
 	int size = width;
 
-	heightMap = new double* [size];
+	heightMap = new float* [size];
 	for (int i = 0; i < size; i++) {
-		heightMap[i] = new double[size];
+		heightMap[i] = new float[size];
 	}
 
-	double num1 = heightMap[0][0] = (double)heightDistr(mapGenerator);
-	double num2 = heightMap[size - 1][0] = (double)heightDistr(mapGenerator);
-	double num3 = heightMap[0][size - 1] = (double)heightDistr(mapGenerator);
-	double num4 = heightMap[size - 1][size - 1] = (double)heightDistr(mapGenerator);
+	float num1 = heightMap[0][0] = (float)heightDistr(mapGenerator);
+	float num2 = heightMap[size - 1][0] = (float)heightDistr(mapGenerator);
+	float num3 = heightMap[0][size - 1] = (float)heightDistr(mapGenerator);
+	float num4 = heightMap[size - 1][size - 1] = (float)heightDistr(mapGenerator);
 
 	int chunkSize = size - 1;
-	double roughness = random;
+	float roughness = random;
 
 	while (chunkSize > 1) {
 		int half = chunkSize / 2;
