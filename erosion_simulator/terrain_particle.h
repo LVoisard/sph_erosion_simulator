@@ -5,6 +5,11 @@
 class TerrainParticle : public Particle {
 public:
 	TerrainParticle(glm::vec3 positon, int coordX, int coordY);
+	int getCoordX() const { return _coordX; };
+	int getCoordY() const { return _coordY; };
+
+	void offsetHeight(float heightOffset) { position.y += heightOffset; }
+	void setHeight(float newHeight) { position.y = newHeight; }
 
 private:
 	// there's likely a better data structure for this (is there an int-only vector2?)

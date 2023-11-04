@@ -61,7 +61,7 @@ HeightMap map;
 TerrainMesh* terrainMesh;
 WaterMesh* waterMesh;
 Sphere* sphere;
-ParticleGenerator* sphParticles;
+ParticleGenerator* particles;
 
 SimulationParametersUI* simParams;
 
@@ -191,7 +191,7 @@ void UpdateShaders(glm::mat4& view, glm::mat4& proj, glm::mat4& model, float& de
 	waterNormalTexture.use();
 	waterShader.setTexture("texture0", GL_TEXTURE0);
 
-	sphParticles->drawParticles();
+	particles->drawParticles();
 	waterShader.stop();
 
 	if (false) {
@@ -199,7 +199,7 @@ void UpdateShaders(glm::mat4& view, glm::mat4& proj, glm::mat4& model, float& de
 		defaultShader.setMat4("view", view);
 		defaultShader.setMat4("projection", proj);
 		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-		sphParticles->drawGridDebug();
+		particles->drawGridDebug();
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	}
 	
@@ -249,7 +249,7 @@ int main(int argc, char* argv[])
 	float cellSize = 1;
 	// this is cubed (3 = 27 in one cube)
 	int numInOneCell = 1;
-	sphParticles = new ParticleGenerator(defaultShader, sphere, &map, cellSize, numInOneCell);
+	particles = new ParticleGenerator(defaultShader, sphere, &map, cellSize, numInOneCell);
 
 	glm::mat4 proj = glm::mat4(1.0f);
 	proj = glm::perspective(glm::radians(fov), window.getAspectRatio(), 0.1f, 1000.0f);
@@ -287,7 +287,8 @@ int main(int argc, char* argv[])
 		glm::mat4 model = glm::mat4(1.0f);
 		glm::mat4 view = camera.getViewMatrix();
 
-		sphParticles->updateParticles(deltaTime, timePast);
+		particles->updateParticles(deltaTime, timePast);
+		terrainMesh->updateMeshFromHeights(&map.heightMap);
 		
 		// drawing
 		UpdateShaders(view, proj, model, deltaTime);

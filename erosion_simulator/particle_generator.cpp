@@ -6,14 +6,20 @@
 ParticleGenerator::ParticleGenerator(Shader& shader, Mesh* mesh, HeightMap* map, float cellSize, int numPerSquare)
 	:shader(shader), particleMesh(mesh), _heightmap(map)
 {
-	float mapWidth = _heightmap->getWidth();
-	float mapLength = _heightmap->getLength();
-	float maxHeight = _heightmap->getMaxHeight();
-	float height = _heightmap->getHeight();
+	int mapWidth = _heightmap->getWidth();
+	int mapLength = _heightmap->getLength();
+	int maxHeight = _heightmap->getMaxHeight();
+	int height = _heightmap->getHeight();
+
+	// derive what was the size passed as command-line argument and offset the partciles so that they match with the terrain
+	// doing this is backwards, we should instead fix the terrain mesh being offset and then remove this code
+	float offsetX = std::pow(2, std::log(mapWidth - 1) / std::log(2) - 1);
+	float offsetY = std::pow(2, std::log(mapLength - 1) / std::log(2) - 1);
 
 	for (int x = 0; x < mapWidth; x++) {
 		for (int y = 0; y < mapLength; y++) {
-			glm::vec3 position(x, map->samplePoint(x, y), y);
+			
+			glm::vec3 position(x-offsetX, map->samplePoint(x, y), y-offsetY);
 			TerrainParticle* p = new TerrainParticle(position, x, y);
 			terrainParticles.push_back(p);
 
@@ -129,6 +135,11 @@ void ParticleGenerator::drawBoundaryParticles()
 	
 }
 
+// just to showcase realtime terrain mesh updating, remove once we have actual sediment deposition logic
+float randomOffset() {
+	return (static_cast <float> (rand()) / static_cast <float> (RAND_MAX) - 0.5f) * 0.05f;
+}
+
 static int iter = 0;
 static float timePast = 0;
 void ParticleGenerator::updateParticles(float deltaTime, float time)
@@ -185,6 +196,28 @@ void ParticleGenerator::updateParticles(float deltaTime, float time)
 		timePast = 0;
 		iter++;
 	}
+
+	// APPLY RANDOM NOISE TO THE TERRAIN MESH
+	float** newHeigthMap = _heightmap->heightMap;
+	for (int i = 0; i < terrainParticles.size(); i++)
+	{
+		// do we need to have an actual in-code representation of terrain particles? I looks like we can work without using them at all
+		//TerrainParticle* particle = terrainParticles[i];
+		//int coordX = particle->getCoordX();
+		//int coordY = particle->getCoordY();
+		//float newHeight = particle->getPosition().y + randomOffset();
+		//particle->setHeight(newHeight);
+
+		// get and edit the terrain values using the heightmap directly instead
+		int coordX = i % mapWidth;
+		int coordZ = (i / mapWidth) % mapLength;
+		float newHeight = _heightmap->samplePoint(coordX, coordZ) + randomOffset();
+
+		// apply changes, but still needs TerrainMesh::updateMeshFromHeights(...) to be called in order to have these changes take effect.
+		//  It is called in main() since we don't have the TerrainMesh reference here, maybe we want to rework this into a more direct hierachy of of calls?
+		newHeigthMap[coordX][coordZ] = newHeight;
+	}
+
 	timePast += deltaTime;
 	
 	/*printf("Nearest Neighbour node to (%f, %f, %f) (ID: %d) is (%f, %f, %f) (ID: %d)\n", 
@@ -194,14 +227,14 @@ void ParticleGenerator::updateParticles(float deltaTime, float time)
 		node->particle->getId());*/
 
 	// update the models buffer
-	glBindBuffer(GL_ARRAY_BUFFER, buffer);
+	glBindBuffer(GL_ARRAY_BUFFER, sphBuffer);
 	void* data = glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
 	memcpy(data, particleModels.data(), sizeof(particleModels[0]) * particleModels.size());
 	glUnmapBuffer(GL_ARRAY_BUFFER);
 
 
 	// update the debug buffer
-	glBindBuffer(GL_ARRAY_BUFFER, annBuffer);
+	glBindBuffer(GL_ARRAY_BUFFER, sphDebugBuffer);
 	void* debugData = glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
 	memcpy(debugData, particleDebugs.data(), sizeof(particleDebugs[0]) * particleDebugs.size());
 	glUnmapBuffer(GL_ARRAY_BUFFER);

@@ -7,12 +7,3 @@ Particle::Particle(glm::vec3 position)
     :position(position), id(Particle::next_id++)
 {
 }
-
-glm::vec3 Particle::getPosition()
-{
-    return position;
-}
-void Particle::setPosition(glm::vec3 position)
-{
-    this->position = position;
-}
