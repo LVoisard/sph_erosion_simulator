@@ -3,24 +3,40 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <exception>
 
-ParticleGenerator::ParticleGenerator(Shader& shader, Mesh* mesh, int mapWidth, int mapLength, int maxHeight, int height, float cellSize, int numPerSquare)
-	:shader(shader), particleMesh(mesh), width(mapWidth), height(height), length(mapLength)
+ParticleGenerator::ParticleGenerator(Shader& shader, Mesh* mesh, HeightMap* map, float cellSize, int numPerSquare)
+	:shader(shader), particleMesh(mesh), _heightmap(map)
 {
-	int particleId = 0;
-	std::cout << " height " << width << std::endl;
-	for (int x = 0; x < width / cellSize * numPerSquare; x++)
+	float mapWidth = _heightmap->getWidth();
+	float mapLength = _heightmap->getLength();
+	float maxHeight = _heightmap->getMaxHeight();
+	float height = _heightmap->getHeight();
+
+	// <= on loop condidtion since we need one more row and column than the map dimensions to complete the grid
+	for (int x = 0; x <= mapWidth; x++) {
+		for (int y = 0; y <= mapLength; y++) {
+			glm::vec3 position(x, map->samplePoint(x, y), y);
+			TerrainParticle* p = new TerrainParticle(position, x, y);
+			terrainParticles.push_back(p);
+
+			// assign models, but I'm not sure where we can make them get drawn
+			particleModelsTerrain.push_back(glm::translate(glm::mat4(1), p->getPosition()));
+		}
+	}
+
+	std::cout << " height " << mapWidth << std::endl;
+	for (int x = 0; x < mapWidth / cellSize * numPerSquare; x++)
 	{
 		for (int y = 0; y < (4 * numPerSquare); y++)
 		{
-			for (int z = 0; z < length / cellSize * numPerSquare; z++)
+			for (int z = 0; z < mapLength / cellSize * numPerSquare; z++)
 			{
 				//((maxHeight - y) + (float) (y * cellSize / 2 / (numPerSquare)) - (cellSize / 2 / (numPerSquare)))
 				glm::vec3 pos(
 					(float)x * cellSize / (numPerSquare) - (float)mapWidth / 2 + (cellSize / 2 / (numPerSquare)) ,
 					(float)((maxHeight - y * cellSize / numPerSquare)) - (cellSize / 2 / (numPerSquare)),
 					(float)z * cellSize / (numPerSquare) - (float)mapLength / 2 + (cellSize / 2 / (numPerSquare)));
-				Particle* p = new Particle(pos, particleId++);
-				particles.push_back(p);
+				SphParticle* p = new SphParticle(pos);
+				sphParticles.push_back(p);
 				particleModels.push_back(glm::translate(glm::mat4(1), p->getPosition()));
 				particleDebugs.push_back(ParticleDebug());
 			}
@@ -71,14 +87,15 @@ ParticleGenerator::ParticleGenerator(Shader& shader, Mesh* mesh, int mapWidth, i
 
 	glBindVertexArray(0);
 
-	grid = Grid3D(mapWidth, mapLength, height, cellSize, particles, shader);
+	std::vector<Particle*> particleVector(sphParticles.begin(), sphParticles.end()); // turn vector<SphParticle*> into vector<Particle*> (implicit casting isn't possible)
+	grid = Grid3D(mapWidth, mapLength, height, cellSize, particleVector, shader);
 
-	std::cout << "Generated " << particles.size() << " particles" << std::endl;
+	std::cout << "Generated " << sphParticles.size() << " particles" << std::endl;
 }
 
 void ParticleGenerator::drawParticles()
 {	
-	particleMesh->drawInstanced(particles.size());
+	particleMesh->drawInstanced(sphParticles.size());
 }
 
 void ParticleGenerator::drawGridDebug()
@@ -90,45 +107,50 @@ static int iter = 0;
 static float timePast = 0;
 void ParticleGenerator::updateParticles(float deltaTime, float time)
 {
-	for (int i = 0; i < particles.size(); i++)
+	for (int i = 0; i < sphParticles.size(); i++)
 	{
 		// before updating particle position
-		Cell* previousCell = grid.getCellFromPosition(particles[i]->getPosition());
+		Cell* previousCell = grid.getCellFromPosition(sphParticles[i]->getPosition());
 		
 		// update particle
-		glm::vec3 pos = particles[i]->getPosition();
-		particles[i]->setPosition(pos + glm::vec3(0, sin(pos.x + pos.z + time) * 0.25 * deltaTime - deltaTime, 0));
+		glm::vec3 pos = sphParticles[i]->getPosition();
+		sphParticles[i]->setPosition(pos + glm::vec3(0, sin(pos.x + pos.z + time) * 0.25 * deltaTime - deltaTime, 0));
 		
 		// search for neighbours
-		std::vector<Particle*> cells = grid.getNeighbouringPaticlesInRadius(particles[i]);
+		std::vector<Particle*> cells = grid.getNeighbouringPaticlesInRadius(sphParticles[i]);
 
 		//after updating particle position
-		Cell* currentCell = grid.getCellFromPosition(particles[i]->getPosition());
+		Cell* currentCell = grid.getCellFromPosition(sphParticles[i]->getPosition());
 		if (previousCell != currentCell)
 		{
 			if (previousCell != nullptr)
-				previousCell->removeParticle(particles[i]);
+				previousCell->removeParticle(sphParticles[i]);
 			if(currentCell != nullptr)
-				currentCell->addParticle(particles[i]);
+				currentCell->addParticle(sphParticles[i]);
 		}
 
-		particleModels[i] = glm::translate(glm::mat4(1.0), particles[i]->getPosition());
+		particleModels[i] = glm::translate(glm::mat4(1.0), sphParticles[i]->getPosition());
 	}
-	int x = iter % width;
-	int z = (iter / width) % length;
-	int y = ((iter / width) / length) % height;
-	int particleID = iter % particles.size();
+
+	int mapWidth = _heightmap->getWidth();
+	int mapHeight = _heightmap->getLength();
+	int mapLength = _heightmap->getHeight();
+
+	int x = iter % mapWidth;
+	int z = (iter / mapWidth) % mapLength;
+	int y = ((iter / mapWidth) / mapLength) % mapHeight;
+	int particleID = iter % sphParticles.size();
 
 
-	if (timePast > (float)60 / particles.size() ) {
-		for (int i = 0; i < particles.size(); i++)
+	if (timePast > (float)60 / sphParticles.size() ) {
+		for (int i = 0; i < sphParticles.size(); i++)
 		{
 			particleDebugs[i].isNearestNeighbour = false;
 			particleDebugs[i].isNearestNeighbourTarget = false;
 		}
 
-		Cell* cell = grid.getCellFromPosition(particles[particleID]->getPosition());
-		std::vector<Particle*> parts = grid.getNeighbouringPaticlesInRadius(particles[particleID]);
+		Cell* cell = grid.getCellFromPosition(sphParticles[particleID]->getPosition());
+		std::vector<Particle*> parts = grid.getNeighbouringPaticlesInRadius(sphParticles[particleID]);
 		particleDebugs[particleID].isNearestNeighbourTarget = true;
 		for (int i = 0; i < parts.size(); i++)
 		{
