@@ -11,9 +11,8 @@ ParticleGenerator::ParticleGenerator(Shader& shader, Mesh* mesh, HeightMap* map,
 	float maxHeight = _heightmap->getMaxHeight();
 	float height = _heightmap->getHeight();
 
-	// <= on loop condidtion since we need one more row and column than the map dimensions to complete the grid
-	for (int x = 0; x <= mapWidth; x++) {
-		for (int y = 0; y <= mapLength; y++) {
+	for (int x = 0; x < mapWidth; x++) {
+		for (int y = 0; y < mapLength; y++) {
 			glm::vec3 position(x, map->samplePoint(x, y), y);
 			TerrainParticle* p = new TerrainParticle(position, x, y);
 			terrainParticles.push_back(p);
