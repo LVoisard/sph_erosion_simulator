@@ -46,8 +46,8 @@ ParticleGenerator::ParticleGenerator(Shader& shader, Mesh* mesh, HeightMap* map,
 
 	glBindVertexArray(VAO);
 
-	glGenBuffers(1, &buffer);
-	glBindBuffer(GL_ARRAY_BUFFER, buffer);
+	glGenBuffers(1, &sphBuffer);
+	glBindBuffer(GL_ARRAY_BUFFER, sphBuffer);
 	glBufferData(GL_ARRAY_BUFFER, particleModels.size() * sizeof(glm::mat4), particleModels.data(), GL_STATIC_DRAW);
 		
 	// set attribute pointers for matrix (4 times vec4)
@@ -68,10 +68,32 @@ ParticleGenerator::ParticleGenerator(Shader& shader, Mesh* mesh, HeightMap* map,
 
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 
+	glGenBuffers(1, &terrainParticlesBuffer);
+	glBindBuffer(GL_ARRAY_BUFFER, terrainParticlesBuffer);
+	glBufferData(GL_ARRAY_BUFFER, particleModelsTerrain.size() * sizeof(glm::mat4), particleModelsTerrain.data(), GL_STATIC_DRAW);
+
+	// set attribute pointers for matrix (4 times vec4)
+	glEnableVertexAttribArray(3);
+	glEnableVertexAttribArray(4);
+	glEnableVertexAttribArray(5);
+	glEnableVertexAttribArray(6);
+
+	glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (void*)0);
+	glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (void*)(1 * sizeof(glm::vec4)));
+	glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (void*)(2 * sizeof(glm::vec4)));
+	glVertexAttribPointer(6, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (void*)(3 * sizeof(glm::vec4)));
+
+	glVertexAttribDivisor(3, 1);
+	glVertexAttribDivisor(4, 1);
+	glVertexAttribDivisor(5, 1);
+	glVertexAttribDivisor(6, 1);
+
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+
 	// debug information 
 
-	glGenBuffers(1, &annBuffer);
-	glBindBuffer(GL_ARRAY_BUFFER, annBuffer);
+	glGenBuffers(1, &sphDebugBuffer);
+	glBindBuffer(GL_ARRAY_BUFFER, sphDebugBuffer);
 	glBufferData(GL_ARRAY_BUFFER, particleDebugs.size() * sizeof(ParticleDebug), particleDebugs.data(), GL_STATIC_DRAW);
 
 	
@@ -100,6 +122,11 @@ void ParticleGenerator::drawParticles()
 void ParticleGenerator::drawGridDebug()
 {
 	grid.draw();
+}
+
+void ParticleGenerator::drawBoundaryParticles()
+{
+	
 }
 
 static int iter = 0;

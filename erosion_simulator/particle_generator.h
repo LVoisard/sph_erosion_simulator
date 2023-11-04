@@ -23,14 +23,16 @@ public:
 	ParticleGenerator(Shader& shader, Mesh* mesh, HeightMap* map, float cellSize, int numPerSquare);
 	void drawParticles();
 	void drawGridDebug();
+	void drawBoundaryParticles();
 	void updateParticles(float deltaTime, float time);
 private:
 
 	HeightMap* _heightmap;
 
 	// instanced array
-	uint32_t buffer = 0;
-	uint32_t annBuffer = 0;
+	uint32_t sphBuffer = 0;
+	uint32_t terrainParticlesBuffer = 0;
+	uint32_t sphDebugBuffer = 0;
 
 	std::vector<SphParticle*> sphParticles;
 	std::vector<TerrainParticle*> terrainParticles;
