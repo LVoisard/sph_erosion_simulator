@@ -1,6 +1,7 @@
 #pragma once
 #include <random>
 #include <string>
+#include "glm/glm.hpp"
 
 class HeightMap
 {
@@ -21,7 +22,7 @@ public:
 	void saveHeightMapPPM(std::string fileName, float*** hmp);
 	glm::vec3 getPositionAtIndex(int x, int y) const { return glm::vec3(x - offset.x, heightMap[x][y], y - offset.y); }
 	float sampleHeightAtIndex(int x, int y) const { return heightMap[x][y]; }
-	float sampleAtPosition(float x, float y) const;
+	float sampleHeightAtPosition(float x, float y) const;
 	float getRGBA(int x, int y) const { return std::clamp(heightMap[x][y] + minHeight / maxHeight + minHeight, 0.0f, 1.0f); }
 	int getMaxHeight() const { return maxHeight; }
 	int getMinHeight() const { return minHeight; }

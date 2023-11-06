@@ -195,15 +195,6 @@ void HeightMap::saveHeightMapPPM(std::string fileName, float*** hmp)
 	buffer.clear();
 }
 
-float HeightMap::sampleHeightAtPosition(float x, float y)
-{
-	return 0.0f;
-}
-
-float HeightMap::sampleAtPosition(int x, int y)
-{
-	return 0.0f;
-}
 
 void HeightMap::generateHeightMap()
 {
@@ -289,10 +280,13 @@ void HeightMap::diamondStep(int chunkSize, int halfChunkSize)
 	}
 }
 
-double HeightMap::samplePoint(float x, float y) const {
+float HeightMap::sampleHeightAtPosition(float x, float y) const {
 	// The position we sample lies within a grid cell of our heightmap.
 	// We sample the four corners of that cell and return an average weighted
 	// by how close the position we sample is to each corner.
+
+	x += offset.x;
+	y += offset.y;
 
 	// Float casted to int are truncated towards 0.
 	int xLeft = (int)x;

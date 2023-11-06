@@ -34,9 +34,8 @@ ParticleGenerator::ParticleGenerator(Shader& shader, Mesh* sphMesh, Mesh* bounda
 
 	for (int x = 0; x < mapWidth; x++) {
 		for (int y = 0; y < mapLength; y++) {
-			glm::vec3 position(x, map->sampleHeightAtIndex(x, y), y);
-			glm::vec3 offset(mapWidth / 2 - terrainSpacing / 2, 0, mapLength / 2 - terrainSpacing / 2);
-			TerrainParticle* terrainPart = new TerrainParticle(position - offset, particleRadius, x, y);
+			glm::vec3 position = map->getPositionAtIndex(x, y);
+			TerrainParticle* terrainPart = new TerrainParticle(position, particleRadius, x, y);
 			terrainParticles.push_back(terrainPart);
 
 			// assign models, but I'm not sure where we can make them get drawn
@@ -152,11 +151,11 @@ void ParticleGenerator::updateParticles(float deltaTime, float time)
 		glm::vec3 pos = sphParticles[i]->getPosition();
 		// if the particle is below the terrain, bring it back.
 		// UNCOMMENT BELOW
-		////float terrainHeightAtPosition = _heightmap->samplePoint(pos.x, pos.z);
-		////if (pos.y < terrainHeightAtPosition) {
-		////	pos.y = terrainHeightAtPosition + 0.001f;
-		////	// should perform some operation on the velocity and pressure here as well.
-		////}
+		float terrainHeightAtPosition = _heightmap->sampleHeightAtPosition(pos.x, pos.z);
+		if (pos.y < terrainHeightAtPosition) {
+			pos.y = terrainHeightAtPosition + 0.001f;
+			// should perform some operation on the velocity and pressure here as well.
+		}
 		sphParticles[i]->setPosition(pos + glm::vec3(0, sin(pos.x + pos.z + time) * 0.25 * deltaTime - deltaTime, 0));
 		particleModels[i] = glm::translate(glm::mat4(1.0), sphParticles[i]->getPosition());
 		
