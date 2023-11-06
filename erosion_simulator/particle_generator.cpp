@@ -150,6 +150,13 @@ void ParticleGenerator::updateParticles(float deltaTime, float time)
 		
 		// update particle
 		glm::vec3 pos = sphParticles[i]->getPosition();
+		// if the particle is below the terrain, bring it back.
+		// UNCOMMENT BELOW
+		////float terrainHeightAtPosition = _heightmap->samplePoint(pos.x, pos.z);
+		////if (pos.y < terrainHeightAtPosition) {
+		////	pos.y = terrainHeightAtPosition + 0.001f;
+		////	// should perform some operation on the velocity and pressure here as well.
+		////}
 		sphParticles[i]->setPosition(pos + glm::vec3(0, sin(pos.x + pos.z + time) * 0.25 * deltaTime - deltaTime, 0));
 		particleModels[i] = glm::translate(glm::mat4(1.0), sphParticles[i]->getPosition());
 		

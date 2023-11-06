@@ -12,18 +12,19 @@ public:
 	void loadHeightMapFromOBJFile(std::string, float heightDiff);
 	void setHeightRange(double minHeight, double maxHeight);
 	void setRandomRange(double random);
-	float** getHeightMap() { return heightMap; }
-	int getWidth() { return width; }
-	int getLength() { return length; }
+	float** getHeightMap() const { return heightMap; }
+	int getWidth() const { return width; }
+	int getLength() const { return length; }
 	void printMap();
 	void changeSeed() {mapGenerator.seed(seedDistr(seedGenerator)); regenerateHeightMap(); }
 	void saveHeightMapPPM(std::string fileName);
 	void saveHeightMapPPM(std::string fileName, float*** hmp);
-	double samplePoint(int x, int y) { return heightMap[x][y]; }
+	double samplePoint(int x, int y) const { return heightMap[x][y]; }
+	double samplePoint(float x, float y) const;
 	double getRGBA(int x, int y) { return std::clamp((double)heightMap[x][y] + minHeight / (double)maxHeight + minHeight, 0.0, 1.0); }
-	int getMaxHeight() { return maxHeight; }
-	int getMinHeight() { return minHeight; }
-	int getHeight() { return maxHeight - minHeight; }
+	int getMaxHeight() const { return maxHeight; }
+	int getMinHeight() const { return minHeight; }
+	int getHeight() const { return maxHeight - minHeight; }
 
 
 	float** heightMap;
