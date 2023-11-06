@@ -28,7 +28,7 @@ TerrainMesh::TerrainMesh(int width, int length, HeightMap* heightMap, Shader sha
 	{
 		for (int x = 0; x < width; x++)
 		{
-			originalHeights[y * length + x] = heightMap->samplePoint(x,y);
+			originalHeights[y * length + x] = heightMap->sampleHeightAtIndex(x,y);
 		}
 	}
 

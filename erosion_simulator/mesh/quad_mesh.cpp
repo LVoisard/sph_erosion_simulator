@@ -5,7 +5,7 @@ void QuadMesh::calculateVertices(HeightMap* map)
 	for (int z = 0; z < length; z++) {
 		for (int x = 0; x < width; x++) {
 			Vertex v{};
-			v.pos = glm::vec3(x - width / 2, map->samplePoint(x, z), z - length / 2);
+			v.pos = glm::vec3(x - width / 2, map->sampleHeightAtIndex(x, z), z - length / 2);
 			v.normal = v.normal = glm::vec3(0.0f, 1.0f, 0.0f);
 			v.uv = glm::vec2((float)x / width, (float)z / length) / (10.0f / width);
 			vertices.push_back(v);

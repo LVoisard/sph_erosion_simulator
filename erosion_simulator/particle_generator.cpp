@@ -34,7 +34,7 @@ ParticleGenerator::ParticleGenerator(Shader& shader, Mesh* sphMesh, Mesh* bounda
 
 	for (int x = 0; x < mapWidth; x++) {
 		for (int y = 0; y < mapLength; y++) {
-			glm::vec3 position(x, map->samplePoint(x, y), y);
+			glm::vec3 position(x, map->sampleHeightAtIndex(x, y), y);
 			glm::vec3 offset(mapWidth / 2 - terrainSpacing / 2, 0, mapLength / 2 - terrainSpacing / 2);
 			TerrainParticle* terrainPart = new TerrainParticle(position - offset, particleRadius, x, y);
 			terrainParticles.push_back(terrainPart);

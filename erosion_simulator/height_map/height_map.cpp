@@ -20,15 +20,16 @@ HeightMap::HeightMap()
 {
 }
 
-HeightMap::HeightMap(double minHeight, double maxHeight)
+HeightMap::HeightMap(float minHeight, float maxHeight)
 	:minHeight(minHeight), maxHeight(maxHeight)
 {
 }
 
-void HeightMap::createProceduralHeightMap(int size, double random)
+void HeightMap::createProceduralHeightMap(int size, float random)
 {
-	this->width = size + 1;
-	this->length = size + 1;
+	width = size + 1;
+	length = size + 1;
+	offset = glm::vec2(width / 2, length / 2);
 	this->random = random;
 	seedDistr = std::uniform_int_distribution<int>(INT_MIN, INT_MAX);
 	heightDistr = std::uniform_real_distribution<>(minHeight, maxHeight);
@@ -133,13 +134,13 @@ void HeightMap::loadHeightMapFromOBJFile(std::string fileName, float heightDiff)
 	}
 }
 
-void HeightMap::setHeightRange(double minHeight, double maxHeight)
+void HeightMap::setHeightRange(float minHeight, float maxHeight)
 {
 	this->minHeight = minHeight;
 	this->maxHeight = maxHeight;
 }
 
-void HeightMap::setRandomRange(double random)
+void HeightMap::setRandomRange(float random)
 {
 	this->random = random;
 	randomDistr = std::uniform_real_distribution<>(-random, random);
@@ -192,6 +193,16 @@ void HeightMap::saveHeightMapPPM(std::string fileName, float*** hmp)
 
 	save_ppm(fileName + ".ppm", buffer, width, length);
 	buffer.clear();
+}
+
+float HeightMap::sampleHeightAtPosition(float x, float y)
+{
+	return 0.0f;
+}
+
+float HeightMap::sampleAtPosition(int x, int y)
+{
+	return 0.0f;
 }
 
 void HeightMap::generateHeightMap()
