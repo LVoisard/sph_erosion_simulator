@@ -20,8 +20,9 @@ struct ParticleDebug {
 class ParticleGenerator
 {
 public:
-	ParticleGenerator(Shader& shader, Mesh* mesh, HeightMap* map, float cellSize, int numPerSquare);
+	ParticleGenerator(Shader& shader, Mesh* sphMesh, Mesh* boundaryMesh, HeightMap* map, float terrainSpacing, float cellSize, float particleRadius, int numPerSquare);
 	void drawParticles();
+	void drawTerrainParticles();
 	void drawGridDebug();
 	void updateParticles(float deltaTime, float time);
 private:
@@ -31,6 +32,7 @@ private:
 	// instanced array
 	uint32_t buffer = 0;
 	uint32_t annBuffer = 0;
+	uint32_t terrainParticlesBuffer = 0;
 
 	std::vector<SphParticle*> sphParticles;
 	std::vector<TerrainParticle*> terrainParticles;
@@ -40,6 +42,7 @@ private:
 	std::vector<ParticleDebug> particleDebugs;
 	Shader shader;
 	Mesh* particleMesh;
+	Mesh* terrainParticlesMesh;
 	Grid3D grid;
 	
 };

@@ -3,42 +3,44 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <exception>
 
-ParticleGenerator::ParticleGenerator(Shader& shader, Mesh* mesh, HeightMap* map, float cellSize, int numPerSquare)
-	:shader(shader), particleMesh(mesh), _heightmap(map)
+ParticleGenerator::ParticleGenerator(Shader& shader, Mesh* sphMesh, Mesh* boundaryMesh, HeightMap* map, float terrainSpacing, float cellSize, float particleRadius, int numPerSquare)
+	:shader(shader), particleMesh(sphMesh), terrainParticlesMesh(boundaryMesh), _heightmap(map)
 {
 	float mapWidth = _heightmap->getWidth();
 	float mapLength = _heightmap->getLength();
 	float maxHeight = _heightmap->getMaxHeight();
-	float height = _heightmap->getHeight();
+	float height = _heightmap->getHeight();	
+
+	std::cout << " height " << (mapWidth - 1) << std::endl;
+	float sphOffset = (cellSize / 2 / (numPerSquare));
+	for (int x = 0; x < (mapWidth - 1) / cellSize * numPerSquare; x++)
+	{
+		for (int y = 0; y < (4 * numPerSquare); y++)
+		{
+			for (int z = 0; z < (mapLength - 1) / cellSize * numPerSquare; z++)
+			{
+				//((maxHeight - y) + (float) (y * cellSize / 2 / (numPerSquare)) - (cellSize / 2 / (numPerSquare)))
+				glm::vec3 pos(
+					(float)x * cellSize / (numPerSquare) - (float)(mapWidth - 1) / 2 + sphOffset,
+					(float)((maxHeight - y * cellSize / numPerSquare)) - sphOffset,
+					(float)z * cellSize / (numPerSquare) - (float)(mapLength - 1) / 2 + sphOffset);
+				SphParticle* sphPart = new SphParticle(pos * terrainSpacing, particleRadius);
+				sphParticles.push_back(sphPart);
+				particleModels.push_back(glm::translate(glm::mat4(1), sphPart->getPosition()));
+				particleDebugs.push_back(ParticleDebug());
+			}
+		}
+	}
 
 	for (int x = 0; x < mapWidth; x++) {
 		for (int y = 0; y < mapLength; y++) {
 			glm::vec3 position(x, map->samplePoint(x, y), y);
-			TerrainParticle* p = new TerrainParticle(position, x, y);
-			terrainParticles.push_back(p);
+			glm::vec3 offset(mapWidth / 2 - terrainSpacing / 2, 0, mapLength / 2 - terrainSpacing / 2);
+			TerrainParticle* terrainPart = new TerrainParticle(position - offset, particleRadius, x, y);
+			terrainParticles.push_back(terrainPart);
 
 			// assign models, but I'm not sure where we can make them get drawn
-			particleModelsTerrain.push_back(glm::translate(glm::mat4(1), p->getPosition()));
-		}
-	}
-
-	std::cout << " height " << mapWidth << std::endl;
-	for (int x = 0; x < mapWidth / cellSize * numPerSquare; x++)
-	{
-		for (int y = 0; y < (4 * numPerSquare); y++)
-		{
-			for (int z = 0; z < mapLength / cellSize * numPerSquare; z++)
-			{
-				//((maxHeight - y) + (float) (y * cellSize / 2 / (numPerSquare)) - (cellSize / 2 / (numPerSquare)))
-				glm::vec3 pos(
-					(float)x * cellSize / (numPerSquare) - (float)mapWidth / 2 + (cellSize / 2 / (numPerSquare)) ,
-					(float)((maxHeight - y * cellSize / numPerSquare)) - (cellSize / 2 / (numPerSquare)),
-					(float)z * cellSize / (numPerSquare) - (float)mapLength / 2 + (cellSize / 2 / (numPerSquare)));
-				SphParticle* p = new SphParticle(pos);
-				sphParticles.push_back(p);
-				particleModels.push_back(glm::translate(glm::mat4(1), p->getPosition()));
-				particleDebugs.push_back(ParticleDebug());
-			}
+			particleModelsTerrain.push_back(glm::translate(glm::mat4(1), terrainPart->getPosition()));
 		}
 	}
 
@@ -48,7 +50,7 @@ ParticleGenerator::ParticleGenerator(Shader& shader, Mesh* mesh, HeightMap* map,
 
 	glGenBuffers(1, &buffer);
 	glBindBuffer(GL_ARRAY_BUFFER, buffer);
-	glBufferData(GL_ARRAY_BUFFER, particleModels.size() * sizeof(glm::mat4), particleModels.data(), GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, particleModels.size() * sizeof(glm::mat4), particleModels.data(), GL_DYNAMIC_DRAW);
 		
 	// set attribute pointers for matrix (4 times vec4)
 	glEnableVertexAttribArray(3);
@@ -72,8 +74,7 @@ ParticleGenerator::ParticleGenerator(Shader& shader, Mesh* mesh, HeightMap* map,
 
 	glGenBuffers(1, &annBuffer);
 	glBindBuffer(GL_ARRAY_BUFFER, annBuffer);
-	glBufferData(GL_ARRAY_BUFFER, particleDebugs.size() * sizeof(ParticleDebug), particleDebugs.data(), GL_STATIC_DRAW);
-
+	glBufferData(GL_ARRAY_BUFFER, particleDebugs.size() * sizeof(ParticleDebug), particleDebugs.data(), GL_DYNAMIC_DRAW);
 	
 	glEnableVertexAttribArray(7);
 	glEnableVertexAttribArray(8);
@@ -86,15 +87,51 @@ ParticleGenerator::ParticleGenerator(Shader& shader, Mesh* mesh, HeightMap* map,
 
 	glBindVertexArray(0);
 
+
+	unsigned int joe = terrainParticlesMesh->getVAO();
+
+	glBindVertexArray(joe);
+	// terrain particles
+
+	glGenBuffers(1, &terrainParticlesBuffer);
+	glBindBuffer(GL_ARRAY_BUFFER, terrainParticlesBuffer);
+	glBufferData(GL_ARRAY_BUFFER, particleModelsTerrain.size() * sizeof(glm::mat4), particleModelsTerrain.data(), GL_DYNAMIC_DRAW);
+
+	// set attribute pointers for matrix (4 times vec4)
+	glEnableVertexAttribArray(3);
+	glEnableVertexAttribArray(4);
+	glEnableVertexAttribArray(5);
+	glEnableVertexAttribArray(6);
+
+	glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (void*)0);
+	glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (void*)(1 * sizeof(glm::vec4)));
+	glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (void*)(2 * sizeof(glm::vec4)));
+	glVertexAttribPointer(6, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (void*)(3 * sizeof(glm::vec4)));
+
+	glVertexAttribDivisor(3, 1);
+	glVertexAttribDivisor(4, 1);
+	glVertexAttribDivisor(5, 1);
+	glVertexAttribDivisor(6, 1);
+
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindVertexArray(0);
+
+
+
 	std::vector<Particle*> particleVector(sphParticles.begin(), sphParticles.end()); // turn vector<SphParticle*> into vector<Particle*> (implicit casting isn't possible)
-	grid = Grid3D(mapWidth, mapLength, height, cellSize, particleVector, shader);
+	grid = Grid3D(mapWidth - 1, mapLength - 1, height,terrainSpacing,  cellSize, particleVector, shader);
 
 	std::cout << "Generated " << sphParticles.size() << " particles" << std::endl;
 }
 
 void ParticleGenerator::drawParticles()
 {	
-	particleMesh->drawInstanced(sphParticles.size());
+	particleMesh->drawInstanced(particleModels.size());
+}
+
+void ParticleGenerator::drawTerrainParticles()
+{
+	terrainParticlesMesh->drawInstanced(particleModelsTerrain.size());
 }
 
 void ParticleGenerator::drawGridDebug()
@@ -114,6 +151,7 @@ void ParticleGenerator::updateParticles(float deltaTime, float time)
 		// update particle
 		glm::vec3 pos = sphParticles[i]->getPosition();
 		sphParticles[i]->setPosition(pos + glm::vec3(0, sin(pos.x + pos.z + time) * 0.25 * deltaTime - deltaTime, 0));
+		particleModels[i] = glm::translate(glm::mat4(1.0), sphParticles[i]->getPosition());
 		
 		// search for neighbours
 		std::vector<Particle*> cells = grid.getNeighbouringPaticlesInRadius(sphParticles[i]);
@@ -128,7 +166,6 @@ void ParticleGenerator::updateParticles(float deltaTime, float time)
 				currentCell->addParticle(sphParticles[i]);
 		}
 
-		particleModels[i] = glm::translate(glm::mat4(1.0), sphParticles[i]->getPosition());
 	}
 
 	int mapWidth = _heightmap->getWidth();
@@ -172,6 +209,11 @@ void ParticleGenerator::updateParticles(float deltaTime, float time)
 	memcpy(data, particleModels.data(), sizeof(particleModels[0]) * particleModels.size());
 	glUnmapBuffer(GL_ARRAY_BUFFER);
 
+	// update the models buffer
+	glBindBuffer(GL_ARRAY_BUFFER, terrainParticlesBuffer);
+	void* terrainData = glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
+	memcpy(terrainData, particleModelsTerrain.data(), sizeof(particleModelsTerrain[0]) * particleModelsTerrain.size());
+	glUnmapBuffer(GL_ARRAY_BUFFER);
 
 	// update the debug buffer
 	glBindBuffer(GL_ARRAY_BUFFER, annBuffer);

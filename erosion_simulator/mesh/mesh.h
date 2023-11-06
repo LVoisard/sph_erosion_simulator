@@ -22,6 +22,7 @@ class Mesh
 {
 public:
 	Mesh();
+	Mesh(Mesh* mesh);
 	Mesh(Shader& shader);
 	Mesh(std::vector<Vertex> vertices, std::vector<uint32_t> indices, Shader& shader);
 	~Mesh();

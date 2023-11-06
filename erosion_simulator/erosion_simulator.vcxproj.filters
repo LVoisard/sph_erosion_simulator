@@ -201,5 +201,7 @@
     <None Include="shaders\water.frag" />
     <None Include="shaders\default.vert" />
     <None Include="shaders\default.frag" />
+    <None Include="shaders\boundary-particle.vert" />
+    <None Include="shaders\boundary-particle.frag" />
   </ItemGroup>
 </Project>

@@ -199,6 +199,8 @@
     <ClInclude Include="window\window.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="shaders\boundary-particle.frag" />
+    <None Include="shaders\boundary-particle.vert" />
     <None Include="shaders\default.frag" />
     <None Include="shaders\default.vert" />
     <None Include="shaders\main.frag" />

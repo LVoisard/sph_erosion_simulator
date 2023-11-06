@@ -4,6 +4,19 @@
 
 Mesh::Mesh()
 {
+	glGenVertexArrays(1, &VAO);
+	glGenBuffers(1, &EBO);
+	glGenBuffers(1, &VBO);
+}
+
+Mesh::Mesh(Mesh* mesh)
+{
+	vertices = mesh->vertices;
+	indices = mesh->indices;
+
+	glGenVertexArrays(1, &VAO);
+	glGenBuffers(1, &EBO);
+	glGenBuffers(1, &VBO);
 }
 
 Mesh::Mesh(Shader& shader):

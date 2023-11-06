@@ -33,6 +33,7 @@ Window window(SCR_WIDTH, SCR_HEIGHT);
 Shader mainShader("shaders/main.vert", "shaders/main.frag");
 Shader waterShader("shaders/water.vert", "shaders/water.frag");
 Shader defaultShader("shaders/default.vert", "shaders/default.frag");
+Shader boundaryParticleShader("shaders/boundary-particle.vert", "shaders/boundary-particle.frag");
 Camera camera(&window, 5.0f, .25f, .5f);
 
 Texture grassTexture("textures/grass.jpg");
@@ -61,6 +62,7 @@ HeightMap map;
 TerrainMesh* terrainMesh;
 WaterMesh* waterMesh;
 Sphere* sphere;
+Sphere* boundaryParticleSphere;
 ParticleGenerator* sphParticles;
 
 SimulationParametersUI* simParams;
@@ -178,10 +180,8 @@ void UpdateShaders(glm::mat4& view, glm::mat4& proj, glm::mat4& model, float& de
 	rockTexture.use(GL_TEXTURE2);
 
 	terrainMesh->draw();
-	
 
 	mainShader.stop();
-
 
 	waterShader.use();
 	waterShader.setMat4("view", view);
@@ -194,13 +194,22 @@ void UpdateShaders(glm::mat4& view, glm::mat4& proj, glm::mat4& model, float& de
 	sphParticles->drawParticles();
 	waterShader.stop();
 
-	if (false) {
+	if (true) {
 		defaultShader.use();
 		defaultShader.setMat4("view", view);
 		defaultShader.setMat4("projection", proj);
 		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 		sphParticles->drawGridDebug();
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+		defaultShader.stop();
+	}
+
+	if (true) {
+		boundaryParticleShader.use();
+		boundaryParticleShader.setMat4("view", view);
+		boundaryParticleShader.setMat4("projection", proj);
+		sphParticles->drawTerrainParticles();
+		boundaryParticleShader.stop();
 	}
 	
 }
@@ -241,15 +250,21 @@ int main(int argc, char* argv[])
 	// initModel();
 
 	terrainMesh = new TerrainMesh(map.getWidth(), map.getLength(), &map.heightMap, mainShader);
-	sphere = new Sphere(glm::vec3(0), 0.1, waterShader);
+	
+	float particleRadius = 0.1;
+	sphere = new Sphere(glm::vec3(0), particleRadius, waterShader);
+	boundaryParticleSphere = new Sphere(glm::vec3(0), particleRadius, boundaryParticleShader);
 
 	terrainMesh->init();
 	sphere->init();
+	boundaryParticleSphere->init();
 
+	float terrainSpacing = 1;
 	float cellSize = 1;
+
 	// this is cubed (3 = 27 in one cube)
 	int numInOneCell = 1;
-	sphParticles = new ParticleGenerator(defaultShader, sphere, &map, cellSize, numInOneCell);
+	sphParticles = new ParticleGenerator(defaultShader, sphere, boundaryParticleSphere, &map, terrainSpacing, cellSize, particleRadius, numInOneCell);
 
 	glm::mat4 proj = glm::mat4(1.0f);
 	proj = glm::perspective(glm::radians(fov), window.getAspectRatio(), 0.1f, 1000.0f);

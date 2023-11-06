@@ -24,7 +24,7 @@ class Grid3D
 {
 public:
 	Grid3D();
-	Grid3D(int width, int length, int height, float cellSize, std::vector<Particle*> particles, Shader & shader);
+	Grid3D(int width, int length, int height, float terrainSpacing, float cellSize, std::vector<Particle*> particles, Shader & shader);
 	void draw();
 	Cell* getCellFromPosition(glm::vec3 pos);
 	std::vector<Cell*> getCellNeighbours(Cell* cell);

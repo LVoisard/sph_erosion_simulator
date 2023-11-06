@@ -4,7 +4,7 @@
 
 class SphParticle : public Particle {
 public:
-	SphParticle(glm::vec3 position);
+	SphParticle(glm::vec3 position, float radius);
 
 	// to be filled in
 };

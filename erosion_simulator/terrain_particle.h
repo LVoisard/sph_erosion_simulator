@@ -4,7 +4,7 @@
 
 class TerrainParticle : public Particle {
 public:
-	TerrainParticle(glm::vec3 positon, int coordX, int coordY);
+	TerrainParticle(glm::vec3 positon, float radius, int coordX, int coordY);
 
 private:
 	// there's likely a better data structure for this (is there an int-only vector2?)
