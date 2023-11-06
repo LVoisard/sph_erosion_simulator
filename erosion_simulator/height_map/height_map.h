@@ -12,20 +12,20 @@ public:
 	void loadHeightMapFromOBJFile(std::string, float heightDiff);
 	void setHeightRange(float minHeight, float maxHeight);
 	void setRandomRange(float random);
-	float** getHeightMap() { return heightMap; }
-	int getWidth() { return width; }
-	int getLength() { return length; }
+	float** getHeightMap() const { return heightMap; }
+	int getWidth() const { return width; }
+	int getLength() const { return length; }
 	void printMap();
 	void changeSeed() {mapGenerator.seed(seedDistr(seedGenerator)); regenerateHeightMap(); }
 	void saveHeightMapPPM(std::string fileName);
 	void saveHeightMapPPM(std::string fileName, float*** hmp);
-	glm::vec3 getPositionAtIndex(int x, int y) { return glm::vec3(x - offset.x, heightMap[x][y], y - offset.y); }
-	float sampleHeightAtIndex(int x, int y) { return heightMap[x][y]; }
-	float sampleAtPosition(float x, float y);
-	float getRGBA(int x, int y) { return std::clamp(heightMap[x][y] + minHeight / maxHeight + minHeight, 0.0f, 1.0f); }
-	int getMaxHeight() { return maxHeight; }
-	int getMinHeight() { return minHeight; }
-	int getHeight() { return maxHeight - minHeight; }
+	glm::vec3 getPositionAtIndex(int x, int y) const { return glm::vec3(x - offset.x, heightMap[x][y], y - offset.y); }
+	float sampleHeightAtIndex(int x, int y) const { return heightMap[x][y]; }
+	float sampleAtPosition(float x, float y) const;
+	float getRGBA(int x, int y) const { return std::clamp(heightMap[x][y] + minHeight / maxHeight + minHeight, 0.0f, 1.0f); }
+	int getMaxHeight() const { return maxHeight; }
+	int getMinHeight() const { return minHeight; }
+	int getHeight() const { return maxHeight - minHeight; }
 
 
 	float** heightMap;

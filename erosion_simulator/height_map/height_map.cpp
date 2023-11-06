@@ -288,3 +288,35 @@ void HeightMap::diamondStep(int chunkSize, int halfChunkSize)
 		}
 	}
 }
+
+double HeightMap::samplePoint(float x, float y) const {
+	// The position we sample lies within a grid cell of our heightmap.
+	// We sample the four corners of that cell and return an average weighted
+	// by how close the position we sample is to each corner.
+
+	// Float casted to int are truncated towards 0.
+	int xLeft = (int)x;
+	int xRight = xLeft + 1;
+	// This will act as the horizontal weight, indicating how close the point is to one side.
+	float xWeight = x - xLeft; // must be between [0, 1).
+
+	int yDown = (int)y;
+	int yUp = yDown + 1;
+	// This will act as the vertical weight, indicating how close the point is to one side.
+	float yWeight = y - yDown;  // must be between [0, 1).
+
+	// Sample the heightmap at each of the cell's corner.
+	float bottomLeftHeight = heightMap[xLeft][yDown];
+	float bottomRightHeight = heightMap[xRight][yDown];
+	float topLeftHeight = heightMap[xLeft][yUp];
+	float topRightHeight = heightMap[xRight][yUp];
+
+	// Adjust the weight of each sample by how close the target position is to it.
+	bottomLeftHeight *= (1 - xWeight) * (1 - yWeight);
+	bottomRightHeight *= xWeight * (1 - yWeight);
+	topLeftHeight *= (1 - xWeight) * (yWeight);
+	topRightHeight *= xWeight * yWeight;
+
+	// Return the average.
+	return 0.25 * (bottomLeftHeight + bottomRightHeight + topLeftHeight + topRightHeight);
+}
