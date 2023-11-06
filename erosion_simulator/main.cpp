@@ -194,7 +194,7 @@ void UpdateShaders(glm::mat4& view, glm::mat4& proj, glm::mat4& model, float& de
 	sphParticles->drawParticles();
 	waterShader.stop();
 
-	if (true) {
+	if (false) {
 		defaultShader.use();
 		defaultShader.setMat4("view", view);
 		defaultShader.setMat4("projection", proj);

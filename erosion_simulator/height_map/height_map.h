@@ -1,17 +1,18 @@
 #pragma once
 #include <random>
 #include <string>
+#include "glm/glm.hpp"
 
 class HeightMap
 {
 public:
 	HeightMap();
-	HeightMap(double minHeight, double maxHeight);
-	void createProceduralHeightMap(int size, double random);
+	HeightMap(float minHeight, float maxHeight);
+	void createProceduralHeightMap(int size, float random);
 	void loadHeightMapFromFile(std::string);
 	void loadHeightMapFromOBJFile(std::string, float heightDiff);
-	void setHeightRange(double minHeight, double maxHeight);
-	void setRandomRange(double random);
+	void setHeightRange(float minHeight, float maxHeight);
+	void setRandomRange(float random);
 	float** getHeightMap() const { return heightMap; }
 	int getWidth() const { return width; }
 	int getLength() const { return length; }
@@ -19,9 +20,10 @@ public:
 	void changeSeed() {mapGenerator.seed(seedDistr(seedGenerator)); regenerateHeightMap(); }
 	void saveHeightMapPPM(std::string fileName);
 	void saveHeightMapPPM(std::string fileName, float*** hmp);
-	double samplePoint(int x, int y) const { return heightMap[x][y]; }
-	double samplePoint(float x, float y) const;
-	double getRGBA(int x, int y) { return std::clamp((double)heightMap[x][y] + minHeight / (double)maxHeight + minHeight, 0.0, 1.0); }
+	glm::vec3 getPositionAtIndex(int x, int y) const { return glm::vec3(x - offset.x, heightMap[x][y], y - offset.y); }
+	float sampleHeightAtIndex(int x, int y) const { return heightMap[x][y]; }
+	float sampleHeightAtPosition(float x, float y) const;
+	float getRGBA(int x, int y) const { return std::clamp(heightMap[x][y] + minHeight / maxHeight + minHeight, 0.0f, 1.0f); }
 	int getMaxHeight() const { return maxHeight; }
 	int getMinHeight() const { return minHeight; }
 	int getHeight() const { return maxHeight - minHeight; }
@@ -30,7 +32,6 @@ public:
 	float** heightMap;
 
 private:
-	void init();
 	void generateHeightMap();
 	void regenerateHeightMap();
 	void squareStep(int chunkSize, int halfChunkSize);
@@ -40,10 +41,12 @@ private:
 	int width;
 	int length;
 
-	double minHeight;
-	double maxHeight;
+	float minHeight;
+	float maxHeight;
 
-	double random;
+	float random;
+
+	glm::vec2 offset;
 
 	std::default_random_engine seedGenerator;
 	std::uniform_int_distribution<int> seedDistr;
