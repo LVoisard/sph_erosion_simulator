@@ -312,5 +312,5 @@ float HeightMap::sampleHeightAtPosition(float x, float y) const {
 	topRightHeight *= xWeight * yWeight;
 
 	// Return the average.
-	return 0.25 * (bottomLeftHeight + bottomRightHeight + topLeftHeight + topRightHeight);
+	return (bottomLeftHeight + bottomRightHeight + topLeftHeight + topRightHeight);
 }

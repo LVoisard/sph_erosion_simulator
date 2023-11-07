@@ -27,7 +27,7 @@ ParticleGenerator::ParticleGenerator(Shader& shader, Mesh* sphMesh, Mesh* bounda
 				SphParticle* sphPart = new SphParticle(pos * terrainSpacing, particleRadius);
 				sphParticles.push_back(sphPart);
 				particleModels.push_back(glm::translate(glm::mat4(1), sphPart->getPosition()));
-				particleDebugs.push_back(ParticleDebug());
+				sphParticleDebugs.push_back(SPHParticleDebug());
 			}
 		}
 	}
@@ -37,18 +37,17 @@ ParticleGenerator::ParticleGenerator(Shader& shader, Mesh* sphMesh, Mesh* bounda
 			glm::vec3 position = map->getPositionAtIndex(x, y);
 			TerrainParticle* terrainPart = new TerrainParticle(position, particleRadius, x, y);
 			terrainParticles.push_back(terrainPart);
+			boundaryParticleDebugs.push_back(BoundaryParticleDebug());
 
 			// assign models, but I'm not sure where we can make them get drawn
 			particleModelsTerrain.push_back(glm::translate(glm::mat4(1), terrainPart->getPosition()));
 		}
 	}
 
-	unsigned int VAO = particleMesh->getVAO();
+	glBindVertexArray(particleMesh->getVAO());
 
-	glBindVertexArray(VAO);
-
-	glGenBuffers(1, &buffer);
-	glBindBuffer(GL_ARRAY_BUFFER, buffer);
+	glGenBuffers(1, &sphBuffer);
+	glBindBuffer(GL_ARRAY_BUFFER, sphBuffer);
 	glBufferData(GL_ARRAY_BUFFER, particleModels.size() * sizeof(glm::mat4), particleModels.data(), GL_DYNAMIC_DRAW);
 		
 	// set attribute pointers for matrix (4 times vec4)
@@ -71,14 +70,14 @@ ParticleGenerator::ParticleGenerator(Shader& shader, Mesh* sphMesh, Mesh* bounda
 
 	// debug information 
 
-	glGenBuffers(1, &annBuffer);
-	glBindBuffer(GL_ARRAY_BUFFER, annBuffer);
-	glBufferData(GL_ARRAY_BUFFER, particleDebugs.size() * sizeof(ParticleDebug), particleDebugs.data(), GL_DYNAMIC_DRAW);
+	glGenBuffers(1, &sphDebugBuffer);
+	glBindBuffer(GL_ARRAY_BUFFER, sphDebugBuffer);
+	glBufferData(GL_ARRAY_BUFFER, sphParticleDebugs.size() * sizeof(SPHParticleDebug), sphParticleDebugs.data(), GL_DYNAMIC_DRAW);
 	
 	glEnableVertexAttribArray(7);
 	glEnableVertexAttribArray(8);
-	glVertexAttribPointer(7, 1, GL_INT, GL_FALSE, sizeof(ParticleDebug), (void*)0);
-	glVertexAttribPointer(8, 1, GL_INT, GL_FALSE, sizeof(ParticleDebug), (void*)(sizeof(int)));
+	glVertexAttribPointer(7, 1, GL_INT, GL_FALSE, sizeof(SPHParticleDebug), (void*)0);
+	glVertexAttribPointer(8, 1, GL_INT, GL_FALSE, sizeof(SPHParticleDebug), (void*)(sizeof(int)));
 	glVertexAttribDivisor(7, 1);
 	glVertexAttribDivisor(8, 1);
 
@@ -86,10 +85,7 @@ ParticleGenerator::ParticleGenerator(Shader& shader, Mesh* sphMesh, Mesh* bounda
 
 	glBindVertexArray(0);
 
-
-	unsigned int joe = terrainParticlesMesh->getVAO();
-
-	glBindVertexArray(joe);
+	glBindVertexArray(terrainParticlesMesh->getVAO());
 	// terrain particles
 
 	glGenBuffers(1, &terrainParticlesBuffer);
@@ -113,14 +109,28 @@ ParticleGenerator::ParticleGenerator(Shader& shader, Mesh* sphMesh, Mesh* bounda
 	glVertexAttribDivisor(6, 1);
 
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+	glGenBuffers(1, &terrainParticlesDebugBuffer);
+	glBindBuffer(GL_ARRAY_BUFFER, terrainParticlesDebugBuffer);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(BoundaryParticleDebug) * boundaryParticleDebugs.size(), boundaryParticleDebugs.data(), GL_DYNAMIC_DRAW);
+	
+	glEnableVertexAttribArray(7);
+
+	glVertexAttribPointer(7, 1, GL_INT, GL_FALSE, sizeof(int), (void*)0);
+
+	glVertexAttribDivisor(7, 1);
+
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+	
 	glBindVertexArray(0);
 
-
-
 	std::vector<Particle*> particleVector(sphParticles.begin(), sphParticles.end()); // turn vector<SphParticle*> into vector<Particle*> (implicit casting isn't possible)
+	particleVector.insert(particleVector.end(), terrainParticles.begin(), terrainParticles.end());
 	grid = Grid3D(mapWidth - 1, mapLength - 1, height,terrainSpacing,  cellSize, particleVector, shader);
 
-	std::cout << "Generated " << sphParticles.size() << " particles" << std::endl;
+	std::cout << "Generated " << sphParticles.size() << " sph particles" << std::endl;
+	std::cout << "Generated " << terrainParticles.size() << " terrain particles" << std::endl;
+	std::cout << "Generated " << sphParticles.size() + terrainParticles.size() << " total particles" << std::endl;
 }
 
 void ParticleGenerator::drawParticles()
@@ -148,19 +158,20 @@ void ParticleGenerator::updateParticles(float deltaTime, float time)
 		Cell* previousCell = grid.getCellFromPosition(sphParticles[i]->getPosition());
 		
 		// update particle
-		glm::vec3 pos = sphParticles[i]->getPosition();
+		sphParticles[i]->update(deltaTime, time);
+
 		// if the particle is below the terrain, bring it back.
 		// UNCOMMENT BELOW
+		glm::vec3 pos = sphParticles[i]->getPosition();
 		float terrainHeightAtPosition = _heightmap->sampleHeightAtPosition(pos.x, pos.z);
 		if (pos.y < terrainHeightAtPosition) {
-			pos.y = terrainHeightAtPosition + 0.001f;
+			sphParticles[i]->setPosition(glm::vec3(pos.x, terrainHeightAtPosition, pos.z));
 			// should perform some operation on the velocity and pressure here as well.
 		}
-		sphParticles[i]->setPosition(pos + glm::vec3(0, sin(pos.x + pos.z + time) * 0.25 * deltaTime - deltaTime, 0));
 		particleModels[i] = glm::translate(glm::mat4(1.0), sphParticles[i]->getPosition());
 		
 		// search for neighbours
-		std::vector<Particle*> cells = grid.getNeighbouringPaticlesInRadius(sphParticles[i]);
+		std::vector<Particle*> parts = grid.getNeighbouringPaticlesInRadius(sphParticles[i]);
 
 		//after updating particle position
 		Cell* currentCell = grid.getCellFromPosition(sphParticles[i]->getPosition());
@@ -183,20 +194,31 @@ void ParticleGenerator::updateParticles(float deltaTime, float time)
 	int y = ((iter / mapWidth) / mapLength) % mapHeight;
 	int particleID = iter % sphParticles.size();
 
+	// debug all particles in one minute (of fps allows it)
 
-	if (timePast > (float)60 / sphParticles.size() ) {
-		for (int i = 0; i < sphParticles.size(); i++)
+	if (timePast > (float)240 / sphParticles.size() ) {
+		for (int i = 0; i < sphParticleDebugs.size(); i++)
 		{
-			particleDebugs[i].isNearestNeighbour = false;
-			particleDebugs[i].isNearestNeighbourTarget = false;
+			sphParticleDebugs[i].isNearestNeighbour = false;
+			sphParticleDebugs[i].isNearestNeighbourTarget = false;
+		}
+		for (int i = 0; i < boundaryParticleDebugs.size(); i++)
+		{
+			boundaryParticleDebugs[i].isNearestNeighbour = false;
 		}
 
 		Cell* cell = grid.getCellFromPosition(sphParticles[particleID]->getPosition());
 		std::vector<Particle*> parts = grid.getNeighbouringPaticlesInRadius(sphParticles[particleID]);
-		particleDebugs[particleID].isNearestNeighbourTarget = true;
+		sphParticleDebugs[particleID].isNearestNeighbourTarget = true;
 		for (int i = 0; i < parts.size(); i++)
 		{
-			particleDebugs[parts[i]->getId()].isNearestNeighbour = true;
+			SphParticle* sph = dynamic_cast<SphParticle*>(parts[i]);
+			TerrainParticle* bound = dynamic_cast<TerrainParticle*>(parts[i]);
+			if (sph != 0)
+				sphParticleDebugs[parts[i]->getId()].isNearestNeighbour = true;
+			else if (bound != 0) {
+				boundaryParticleDebugs[parts[i]->getId() - sphParticles.size()].isNearestNeighbour = true;
+			}
 		}
 		timePast = 0;
 		iter++;
@@ -210,7 +232,7 @@ void ParticleGenerator::updateParticles(float deltaTime, float time)
 		node->particle->getId());*/
 
 	// update the models buffer
-	glBindBuffer(GL_ARRAY_BUFFER, buffer);
+	glBindBuffer(GL_ARRAY_BUFFER, sphBuffer);
 	void* data = glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
 	memcpy(data, particleModels.data(), sizeof(particleModels[0]) * particleModels.size());
 	glUnmapBuffer(GL_ARRAY_BUFFER);
@@ -222,9 +244,14 @@ void ParticleGenerator::updateParticles(float deltaTime, float time)
 	glUnmapBuffer(GL_ARRAY_BUFFER);
 
 	// update the debug buffer
-	glBindBuffer(GL_ARRAY_BUFFER, annBuffer);
+	glBindBuffer(GL_ARRAY_BUFFER, sphDebugBuffer);
 	void* debugData = glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
-	memcpy(debugData, particleDebugs.data(), sizeof(particleDebugs[0]) * particleDebugs.size());
+	memcpy(debugData, sphParticleDebugs.data(), sizeof(sphParticleDebugs[0]) * sphParticleDebugs.size());
+	glUnmapBuffer(GL_ARRAY_BUFFER);
+
+	glBindBuffer(GL_ARRAY_BUFFER, terrainParticlesDebugBuffer);
+	void* boundaryDebugData = glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
+	memcpy(boundaryDebugData, boundaryParticleDebugs.data(), sizeof(boundaryParticleDebugs[0]) * boundaryParticleDebugs.size());
 	glUnmapBuffer(GL_ARRAY_BUFFER);
 	
 	//particleMesh->update();

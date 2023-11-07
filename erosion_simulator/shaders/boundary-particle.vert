@@ -4,10 +4,13 @@ layout (location = 0) in vec3 pos;
 layout (location = 1) in vec3 normal;
 layout (location = 2) in vec2 uv;
 layout (location = 3) in mat4 aInstanceMatrix;
+layout (location = 7) in int neighbour;
 
 out vec3 fragNormal;
 out vec3 fragPos;
 out vec2 texCoord;
+
+flat out int fragIsNeighbour;
 
 uniform mat4 projection;
 uniform mat4 view;
@@ -21,4 +24,6 @@ void main()
 	fragPos = pos;
 	
 	texCoord = uv;	
+
+	fragIsNeighbour = neighbour;
 }

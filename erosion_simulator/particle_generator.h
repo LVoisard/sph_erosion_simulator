@@ -6,12 +6,19 @@
 #include <vector>
 #include "grid_3d.h"
 
-struct ParticleDebug {
+struct SPHParticleDebug {
 	int isNearestNeighbourTarget;
 	int isNearestNeighbour;
 
-	ParticleDebug() {
+	SPHParticleDebug() {
 		isNearestNeighbourTarget = 0;
+		isNearestNeighbour = 0;
+	}
+};
+
+struct BoundaryParticleDebug {
+	int isNearestNeighbour;
+	BoundaryParticleDebug() {
 		isNearestNeighbour = 0;
 	}
 };
@@ -30,16 +37,18 @@ private:
 	HeightMap* _heightmap;
 
 	// instanced array
-	uint32_t buffer = 0;
-	uint32_t annBuffer = 0;
+	uint32_t sphBuffer = 0;
+	uint32_t sphDebugBuffer = 0;
 	uint32_t terrainParticlesBuffer = 0;
+	uint32_t terrainParticlesDebugBuffer = 0;
 
 	std::vector<SphParticle*> sphParticles;
 	std::vector<TerrainParticle*> terrainParticles;
 
 	std::vector<glm::mat4> particleModels;
 	std::vector<glm::mat4> particleModelsTerrain;
-	std::vector<ParticleDebug> particleDebugs;
+	std::vector<SPHParticleDebug> sphParticleDebugs;
+	std::vector<BoundaryParticleDebug> boundaryParticleDebugs;
 	Shader shader;
 	Mesh* particleMesh;
 	Mesh* terrainParticlesMesh;

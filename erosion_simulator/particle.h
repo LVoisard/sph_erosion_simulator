@@ -6,7 +6,7 @@ class Particle
 {
 public:
 	Particle(glm::vec3 position, float radius);
-
+	virtual void update(float deltaTime, float time);
 	void setPosition(glm::vec3 position);	
 	glm::vec3 getPosition() { return position; }
 
@@ -14,7 +14,7 @@ public:
 	
 	int getId() { return id; }
 
-private:
+protected:
 	glm::vec3 position;
 	float radius;
 
