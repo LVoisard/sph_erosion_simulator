@@ -158,10 +158,12 @@
     <ClCompile Include="mesh\quad_mesh.cpp" />
     <ClCompile Include="mesh\sphere.cpp" />
     <ClCompile Include="mesh\terrain_mesh.cpp" />
+    <ClCompile Include="neighborTable.cpp" />
     <ClCompile Include="particle.cpp" />
     <ClCompile Include="particle_generator.cpp" />
     <ClCompile Include="shader\shader.cpp" />
     <ClCompile Include="skybox\skybox.cpp" />
+    <ClCompile Include="sph.cpp" />
     <ClCompile Include="sph_particle.cpp" />
     <ClCompile Include="terrain_particle.cpp" />
     <ClCompile Include="texture\texture.cpp" />
@@ -187,11 +189,13 @@
     <ClInclude Include="mesh\quad_mesh.h" />
     <ClInclude Include="mesh\sphere.h" />
     <ClInclude Include="mesh\terrain_mesh.h" />
+    <ClInclude Include="neighborTable.h" />
     <ClInclude Include="particle.h" />
     <ClInclude Include="particle_generator.h" />
     <ClInclude Include="shader\shader.h" />
     <ClInclude Include="simulation_parameters_ui.h" />
     <ClInclude Include="skybox\skybox.h" />
+    <ClInclude Include="sph.h" />
     <ClInclude Include="sph_particle.h" />
     <ClInclude Include="terrain_particle.h" />
     <ClInclude Include="texture\texture.h" />
