@@ -165,6 +165,11 @@ void ParticleGenerator::updateParticles(float deltaTime, float time)
 		glm::vec3 pos = sphParticles[i]->getPosition();
 		float terrainHeightAtPosition = _heightmap->sampleHeightAtPosition(pos.x, pos.z);
 		if (pos.y < terrainHeightAtPosition) {
+			glm::vec3 normal = _heightmap->sampleNormalAtPosition(pos.x, pos.z);
+			glBegin(GL_LINES);
+			glVertex3f(pos.x, pos.y, pos.z);
+			glVertex3f(pos.x + normal.x, pos.y + normal.y, pos.z + normal.z);
+			glEnd();
 			sphParticles[i]->setPosition(glm::vec3(pos.x, terrainHeightAtPosition, pos.z));
 			// should perform some operation on the velocity and pressure here as well.
 		}
@@ -220,6 +225,7 @@ void ParticleGenerator::updateParticles(float deltaTime, float time)
 				boundaryParticleDebugs[parts[i]->getId() - sphParticles.size()].isNearestNeighbour = true;
 			}
 		}
+		std::cout << parts.size() << " neighbours" << std::endl;
 		timePast = 0;
 		iter++;
 	}
@@ -254,5 +260,4 @@ void ParticleGenerator::updateParticles(float deltaTime, float time)
 	memcpy(boundaryDebugData, boundaryParticleDebugs.data(), sizeof(boundaryParticleDebugs[0]) * boundaryParticleDebugs.size());
 	glUnmapBuffer(GL_ARRAY_BUFFER);
 	
-	//particleMesh->update();
 }

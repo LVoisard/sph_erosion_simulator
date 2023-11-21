@@ -314,3 +314,38 @@ float HeightMap::sampleHeightAtPosition(float x, float y) const {
 	// Return the average.
 	return (bottomLeftHeight + bottomRightHeight + topLeftHeight + topRightHeight);
 }
+
+glm::vec3 HeightMap::sampleNormalAtPosition(float x, float y) const
+{
+	// this wont be the exact normal, but can do 
+
+	// Float casted to int are truncated towards 0.
+	int xLeft = (int)x;
+	int xRight = xLeft + 1;
+	// This will act as the horizontal weight, indicating how close the point is to one side.
+	float xWeight = x - xLeft; // must be between [0, 1).
+
+	int yDown = (int)y;
+	int yUp = yDown + 1;
+	// This will act as the vertical weight, indicating how close the point is to one side.
+	float yWeight = y - yDown;  // must be between [0, 1).
+
+	// Sample the heightmap at each of the cell's corner.
+	float newxLeft = xLeft < 0 ? x : xLeft;
+	float newxRight = xRight  >= width ? x : xRight;
+	float newyUp = yUp  >= length ? y : yUp;
+	float newyDown = yDown < 0 ? y : yDown;
+
+	glm::vec3 left(newxLeft, sampleHeightAtPosition(newxLeft, y), y);
+	glm::vec3 rightHeight(newxRight, sampleHeightAtPosition(newxRight, y), y);
+	glm::vec3 topHeight(x, sampleHeightAtPosition(x, newyUp), newyUp);
+	glm::vec3 bottomHeight(x, sampleHeightAtPosition(x, newyDown), newyDown);
+
+	glm::vec3 normal = glm::cross(glm::normalize(rightHeight - left), glm::normalize(topHeight - bottomHeight));
+
+	// Adjust the weight of each sample by how close the target position is to it.
+
+
+	// Return the average.
+	return normal;
+}
