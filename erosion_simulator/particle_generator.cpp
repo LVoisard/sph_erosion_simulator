@@ -15,7 +15,7 @@ ParticleGenerator::ParticleGenerator(Shader& shader, Mesh* sphMesh, Mesh* bounda
 	float sphOffset = (cellSize / 2 / (numPerSquare));
 	for (int x = 0; x < (mapWidth - 1) / cellSize * numPerSquare; x++)
 	{
-		for (int y = 0; y < (4 * numPerSquare); y++)
+		for (int y = 0; y < (numPerSquare); y++)
 		{
 			for (int z = 0; z < (mapLength - 1) / cellSize * numPerSquare; z++)
 			{
@@ -124,9 +124,9 @@ ParticleGenerator::ParticleGenerator(Shader& shader, Mesh* sphMesh, Mesh* bounda
 	
 	glBindVertexArray(0);
 
-	std::vector<Particle*> particleVector(sphParticles.begin(), sphParticles.end()); // turn vector<SphParticle*> into vector<Particle*> (implicit casting isn't possible)
-	particleVector.insert(particleVector.end(), terrainParticles.begin(), terrainParticles.end());
-	grid = Grid3D(mapWidth - 1, mapLength - 1, height,terrainSpacing,  cellSize, particleVector, shader);
+	std::vector<SphParticle*> sphParticleVector(sphParticles.begin(), sphParticles.end()); // turn vector<SphParticle*> into vector<Particle*> (implicit casting isn't possible)
+	std::vector<TerrainParticle*> terrainParticleVector(terrainParticles.begin(), terrainParticles.end());
+	grid = Grid3D(mapWidth - 1, mapLength - 1, height,terrainSpacing,  cellSize, sphParticleVector, terrainParticleVector, shader);
 
 	std::cout << "Generated " << sphParticles.size() << " sph particles" << std::endl;
 	std::cout << "Generated " << terrainParticles.size() << " terrain particles" << std::endl;
@@ -152,37 +152,73 @@ static int iter = 0;
 static float timePast = 0;
 void ParticleGenerator::updateParticles(float deltaTime, float time)
 {
+	deltaTime = 0.013;
 	for (int i = 0; i < sphParticles.size(); i++)
 	{
 		// before updating particle position
-		Cell* previousCell = grid.getCellFromPosition(sphParticles[i]->getPosition());
+		
 		
 		// update particle
-		sphParticles[i]->update(deltaTime, time);
+		std::vector<SphParticle*> parts = grid.getNeighbouringSPHPaticlesInRadius(sphParticles[i]);
+		parallelDensityAndPressures(sphParticles[i], parts, settings);
+		parallelForces(sphParticles[i], parts, settings);
 
+	}
+
+	for (int i = 0; i < sphParticles.size(); i++)
+	{
+		Cell* previousCell = grid.getCellFromPosition(sphParticles[i]->getPosition());
+		glm::vec3 acceleration = sphParticles[i]->getForce() / sphParticles[i]->getDensity() + glm::vec3(0, settings.g, 0);
+		sphParticles[i]->setVelocity(sphParticles[i]->getVelocity() + acceleration * deltaTime);
+
+
+		glm::vec3 pos = sphParticles[i]->getPosition();
+		glm::vec3 vel = sphParticles[i]->getVelocity();
+		float rad = sphParticles[i]->getRadius();
+		// std::cout << pos.x << " " << pos.y << " " << pos.z << std::endl;
+		
+		if (pos.x - rad < _heightmap->getMinX() || pos.x + rad >= _heightmap->getMaxX() - 1) {
+			sphParticles[i]->setPosition(glm::vec3(pos.x - rad < _heightmap->getMinX() ? _heightmap->getMinX() + rad : _heightmap->getMaxX() - 1 - rad, pos.y, pos.z));
+			sphParticles[i]->setVelocity(glm::vec3(-vel.x, vel.y, vel.z));
+			//std::cout << "outside X bounds" << std::endl;
+		}
+
+		if (pos.z - rad < _heightmap->getMinZ() || pos.z + rad >= _heightmap->getMaxZ() - 1) {
+			//std::cout << "outside Z bounds" << std::endl;
+			sphParticles[i]->setPosition(glm::vec3(pos.x, pos.y, pos.z - rad < _heightmap->getMinZ() ? _heightmap->getMinZ() + rad : _heightmap->getMaxZ() - 1 - rad));
+			sphParticles[i]->setVelocity(glm::vec3(vel.x, vel.y, -vel.z));
+		}
+
+
+		pos = sphParticles[i]->getPosition();
+		vel = sphParticles[i]->getVelocity();
 		// if the particle is below the terrain, bring it back.
 		// UNCOMMENT BELOW
-		glm::vec3 pos = sphParticles[i]->getPosition();
 		float terrainHeightAtPosition = _heightmap->sampleHeightAtPosition(pos.x, pos.z);
-		if (pos.y < terrainHeightAtPosition) {
-			sphParticles[i]->setPosition(glm::vec3(pos.x, terrainHeightAtPosition, pos.z));
+		if (sphParticles[i]->getPosition().y - rad <= terrainHeightAtPosition) {
+
+			glm::vec3 normal = _heightmap->sampleNormalAtPosition(pos.x, pos.z);
+			sphParticles[i]->setPosition(glm::vec3(pos.x, terrainHeightAtPosition + rad, pos.z));
+			glm::vec3 newVel = glm::reflect(sphParticles[i]->getVelocity(), normal);
+			sphParticles[i]->setVelocity(glm::vec3(newVel.x * 0.9, newVel.y * 0.15, newVel.z * 0.9));
+			// sphParticles[i]->setVelocity(glm::vec3(vel.x, -vel.y * 0.2, vel.z));
 			// should perform some operation on the velocity and pressure here as well.
 		}
+
+		// Update position
+		sphParticles[i]->setPosition(sphParticles[i]->getPosition() + sphParticles[i]->getVelocity() * deltaTime);
 		particleModels[i] = glm::translate(glm::mat4(1.0), sphParticles[i]->getPosition());
-		
 		// search for neighbours
-		std::vector<Particle*> parts = grid.getNeighbouringPaticlesInRadius(sphParticles[i]);
 
 		//after updating particle position
 		Cell* currentCell = grid.getCellFromPosition(sphParticles[i]->getPosition());
 		if (previousCell != currentCell)
 		{
 			if (previousCell != nullptr)
-				previousCell->removeParticle(sphParticles[i]);
-			if(currentCell != nullptr)
-				currentCell->addParticle(sphParticles[i]);
+				previousCell->removeSphParticle(sphParticles[i]);
+			if (currentCell != nullptr)
+				currentCell->addSphParticle(sphParticles[i]);
 		}
-
 	}
 
 	int mapWidth = _heightmap->getWidth();
@@ -196,7 +232,7 @@ void ParticleGenerator::updateParticles(float deltaTime, float time)
 
 	// debug all particles in one minute (of fps allows it)
 
-	if (timePast > (float)240 / sphParticles.size() ) {
+	if (timePast > (float)60 / sphParticles.size() ) {
 		for (int i = 0; i < sphParticleDebugs.size(); i++)
 		{
 			sphParticleDebugs[i].isNearestNeighbour = false;
@@ -208,17 +244,11 @@ void ParticleGenerator::updateParticles(float deltaTime, float time)
 		}
 
 		Cell* cell = grid.getCellFromPosition(sphParticles[particleID]->getPosition());
-		std::vector<Particle*> parts = grid.getNeighbouringPaticlesInRadius(sphParticles[particleID]);
+		std::vector<SphParticle*> parts = grid.getNeighbouringSPHPaticlesInRadius(sphParticles[particleID]);
 		sphParticleDebugs[particleID].isNearestNeighbourTarget = true;
 		for (int i = 0; i < parts.size(); i++)
 		{
-			SphParticle* sph = dynamic_cast<SphParticle*>(parts[i]);
-			TerrainParticle* bound = dynamic_cast<TerrainParticle*>(parts[i]);
-			if (sph != 0)
-				sphParticleDebugs[parts[i]->getId()].isNearestNeighbour = true;
-			else if (bound != 0) {
-				boundaryParticleDebugs[parts[i]->getId() - sphParticles.size()].isNearestNeighbour = true;
-			}
+			sphParticleDebugs[parts[i]->getId()].isNearestNeighbour = true;
 		}
 		timePast = 0;
 		iter++;

@@ -23,8 +23,8 @@ public:
 
 	// to be filled in
 private:
-	glm::vec3 velocity, acceleration, force;
-	float pressure;
-	float density;
+	glm::vec3 velocity = glm::vec3(0), acceleration = glm::vec3(0), force = glm::vec3(0);
+	float pressure = 1;
+	float density = 1;
 	uint16_t hash;
 };

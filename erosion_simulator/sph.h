@@ -15,17 +15,23 @@ struct SPHSettings
           restDensity, viscosity, h, g, tension, massPoly6Product;
 };
 
-/// Calculates and stores particle hashes.
-void parallelCalculateHashes(
-    SphParticle* particles, size_t start, size_t end, const SPHSettings& settings);
 
-/// Sort particles in place by hash.
-void sortParticles(SphParticle* particles, const size_t& particleCount);
+void parallelForces(
+    SphParticle* particle, std::vector<SphParticle*> neighbours,
+    const SPHSettings& settings);
+
+void parallelUpdateParticlePositions(
+    std::vector<SphParticle*> particles, const SPHSettings& settings, const float& deltaTime);
+
+void parallelDensityAndPressures(
+    SphParticle* particle, std::vector<SphParticle*> neighbours,
+    const SPHSettings& settings);
 
 /// Update attrs of particles in place.
 void updateParticles(
     SphParticle* particles, glm::mat4* particleTransforms,
     const size_t particleCount, const SPHSettings& settings,
     float deltaTime, const bool onGPU);
+
 
 #endif //SPH_SPH_H

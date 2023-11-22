@@ -260,10 +260,10 @@ int main(int argc, char* argv[])
 	boundaryParticleSphere->init();
 
 	float terrainSpacing = 1;
-	float cellSize = 2;
+	float cellSize = 0.125;
 
 	// this is cubed (3 = 27 in one cube)
-	int numInOneCell = 2;
+	int numInOneCell = 1;
 	sphParticles = new ParticleGenerator(defaultShader, sphere, boundaryParticleSphere, &map, terrainSpacing, cellSize, particleRadius, numInOneCell);
 
 	glm::mat4 proj = glm::mat4(1.0f);

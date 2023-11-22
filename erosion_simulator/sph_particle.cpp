@@ -1,6 +1,13 @@
 #include "sph_particle.h"
 
-SphParticle::SphParticle(glm::vec3 position, float radius) : Particle(position, radius) {}
+SphParticle::SphParticle(glm::vec3 position, float radius) : Particle(position, radius) {
+	float vx = rand() % 1000 / 100.0;
+	float vy = rand() % 1000 / 100.0;
+	float vz = rand() % 1000 / 100.0;
+
+
+	velocity = glm::vec3(0);
+}
 
 void SphParticle::update(float deltaTime, float time)
 {

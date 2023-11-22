@@ -26,8 +26,13 @@ public:
 	float getRGBA(int x, int y) const { return std::clamp(heightMap[x][y] + minHeight / maxHeight + minHeight, 0.0f, 1.0f); }
 	int getMaxHeight() const { return maxHeight; }
 	int getMinHeight() const { return minHeight; }
+	float getMinX() const { return - offset.x; }
+	float getMinZ() const { return - offset.y; }
+	float getMaxX() const { return width - offset.x; }
+	float getMaxZ() const { return length - offset.y; }
 	int getHeight() const { return maxHeight - minHeight; }
-
+	bool pointInBounds(float x, float z) const;
+	glm::vec3 sampleNormalAtPosition(float x, float y) const;
 
 	float** heightMap;
 
