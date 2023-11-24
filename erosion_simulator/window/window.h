@@ -7,6 +7,7 @@
 #include "erosion_model.h"
 #include "simulation_parameters_ui.h"
 #include <string>
+#include "sph.h"
 
 const int SIMULATION_PARAMETER_WINDOW_WIDTH = 600;
 
@@ -47,7 +48,7 @@ public:
 	double getMouseScrollY() { return mouseScrollY; }
 	
 	
-	void Menu(ErosionModel*, SimulationParametersUI*);
+	void Menu(SPHSettings*, SimulationParametersUI*);
 	bool showSimulationParameters;
 	bool showPaintBrushMenu;
 	bool showSaveMenu;
@@ -76,7 +77,7 @@ private:
 	double mouseDeltaY = 0;
 
 	
-	void ShowSimulationParameters(ErosionModel* model, SimulationParametersUI* params, bool* open);
+	void ShowSimulationParameters(SPHSettings* params, bool* open);
 	void ShowPaintBrushMenu(ErosionModel* model, SimulationParametersUI* params, bool* open);
 	void ShowSaveMenu(SimulationParametersUI* params, bool* open);
 

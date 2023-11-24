@@ -1,12 +1,17 @@
 #include "sph_particle.h"
 
 SphParticle::SphParticle(glm::vec3 position, float radius) : Particle(position, radius) {
-	float vx = rand() % 1000 / 100.0;
+	/*float vx = rand() % 1000 / 100.0;
 	float vy = rand() % 1000 / 100.0;
 	float vz = rand() % 1000 / 100.0;
 
+	float px = (rand() % 10 - 4) * rand() % 10 / 10.f;
+	float py = (rand() % 10 - 4) * rand() % 10 / 10.f;
+	float pz = (rand() % 10 - 4) * rand() % 10 / 10.f;*/
 
-	velocity = glm::vec3(0);
+
+	//velocity = glm::vec3(vx, vy, vz);
+	//this->position = glm::vec3(px, py, pz);
 }
 
 void SphParticle::update(float deltaTime, float time)

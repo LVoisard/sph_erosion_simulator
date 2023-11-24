@@ -260,10 +260,10 @@ int main(int argc, char* argv[])
 	boundaryParticleSphere->init();
 
 	float terrainSpacing = 1;
-	float cellSize = 0.125;
+	float cellSize = 1;
 
 	// this is cubed (3 = 27 in one cube)
-	int numInOneCell = 1;
+	int numInOneCell = 2;
 	sphParticles = new ParticleGenerator(defaultShader, sphere, boundaryParticleSphere, &map, terrainSpacing, cellSize, particleRadius, numInOneCell);
 
 	glm::mat4 proj = glm::mat4(1.0f);
@@ -307,7 +307,7 @@ int main(int argc, char* argv[])
 		// drawing
 		UpdateShaders(view, proj, model, deltaTime);
 
-		// window.Menu(erosionModel, simParams);
+		window.Menu(&(sphParticles->settings), simParams);
 
 		ImGui::Render();
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
@@ -318,9 +318,9 @@ int main(int argc, char* argv[])
 		window.pollEvents();
 	}
 
-	//ImGui_ImplOpenGL3_Shutdown();
-	//ImGui_ImplGlfw_Shutdown();
-	//ImGui::DestroyContext();
+	ImGui_ImplOpenGL3_Shutdown();
+	ImGui_ImplGlfw_Shutdown();
+	ImGui::DestroyContext();
 
 	// glfw: terminate, clearing all previously allocated GLFW resources.
 	// ------------------------------------------------------------------

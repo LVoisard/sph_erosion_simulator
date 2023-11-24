@@ -2,6 +2,7 @@
 #include <iostream>
 #include <glm/gtc/matrix_transform.hpp>
 #include <exception>
+#include <unordered_map>
 
 ParticleGenerator::ParticleGenerator(Shader& shader, Mesh* sphMesh, Mesh* boundaryMesh, HeightMap* map, float terrainSpacing, float cellSize, float particleRadius, int numPerSquare)
 	:shader(shader), particleMesh(sphMesh), terrainParticlesMesh(boundaryMesh), _heightmap(map)
@@ -128,6 +129,8 @@ ParticleGenerator::ParticleGenerator(Shader& shader, Mesh* sphMesh, Mesh* bounda
 	std::vector<TerrainParticle*> terrainParticleVector(terrainParticles.begin(), terrainParticles.end());
 	grid = Grid3D(mapWidth - 1, mapLength - 1, height,terrainSpacing,  cellSize, sphParticleVector, terrainParticleVector, shader);
 
+	//settings.restDensity = ((mapWidth - 1) * (mapLength - 1) * height) / (settings.mass * sphParticles.size()) * cellSize;
+
 	std::cout << "Generated " << sphParticles.size() << " sph particles" << std::endl;
 	std::cout << "Generated " << terrainParticles.size() << " terrain particles" << std::endl;
 	std::cout << "Generated " << sphParticles.size() + terrainParticles.size() << " total particles" << std::endl;
@@ -153,15 +156,27 @@ static float timePast = 0;
 void ParticleGenerator::updateParticles(float deltaTime, float time)
 {
 	deltaTime = 0.013;
+	std::unordered_map <SphParticle*,std::vector<SphParticle*>> particleNeigbours;
+
 	for (int i = 0; i < sphParticles.size(); i++)
 	{
 		// before updating particle position
 		
-		
 		// update particle
 		std::vector<SphParticle*> parts = grid.getNeighbouringSPHPaticlesInRadius(sphParticles[i]);
-		parallelDensityAndPressures(sphParticles[i], parts, settings);
-		parallelForces(sphParticles[i], parts, settings);
+		std::pair<SphParticle*, std::vector<SphParticle*>> pair(sphParticles[i], parts);
+		particleNeigbours.insert(pair);
+		calculateDensity(sphParticles[i], particleNeigbours.at(sphParticles[i]), settings);
+		// calculatePressure(sphParticles[i], particleNeigbours.at(sphParticles[i]), settings);
+
+	}
+	for (int i = 0; i < sphParticles.size(); i++)
+	{
+		// before updating particle position
+
+
+		// update particle
+		calculatePressureForce(sphParticles[i], particleNeigbours.at(sphParticles[i]), settings);
 
 	}
 
@@ -179,14 +194,14 @@ void ParticleGenerator::updateParticles(float deltaTime, float time)
 		
 		if (pos.x - rad < _heightmap->getMinX() || pos.x + rad >= _heightmap->getMaxX() - 1) {
 			sphParticles[i]->setPosition(glm::vec3(pos.x - rad < _heightmap->getMinX() ? _heightmap->getMinX() + rad : _heightmap->getMaxX() - 1 - rad, pos.y, pos.z));
-			sphParticles[i]->setVelocity(glm::vec3(-vel.x, vel.y, vel.z));
+			sphParticles[i]->setVelocity(glm::vec3(-vel.x * 0.15f, vel.y * 0.95f, vel.z * 0.15f));
 			//std::cout << "outside X bounds" << std::endl;
 		}
 
 		if (pos.z - rad < _heightmap->getMinZ() || pos.z + rad >= _heightmap->getMaxZ() - 1) {
 			//std::cout << "outside Z bounds" << std::endl;
 			sphParticles[i]->setPosition(glm::vec3(pos.x, pos.y, pos.z - rad < _heightmap->getMinZ() ? _heightmap->getMinZ() + rad : _heightmap->getMaxZ() - 1 - rad));
-			sphParticles[i]->setVelocity(glm::vec3(vel.x, vel.y, -vel.z));
+			sphParticles[i]->setVelocity(glm::vec3(vel.x * 0.15f, vel.y * 0.95f, -vel.z * 0.15f));
 		}
 
 
@@ -200,9 +215,14 @@ void ParticleGenerator::updateParticles(float deltaTime, float time)
 			glm::vec3 normal = _heightmap->sampleNormalAtPosition(pos.x, pos.z);
 			sphParticles[i]->setPosition(glm::vec3(pos.x, terrainHeightAtPosition + rad, pos.z));
 			glm::vec3 newVel = glm::reflect(sphParticles[i]->getVelocity(), normal);
-			sphParticles[i]->setVelocity(glm::vec3(newVel.x * 0.9, newVel.y * 0.15, newVel.z * 0.9));
+			sphParticles[i]->setVelocity(glm::vec3(newVel.x * 0.95, newVel.y * 0.15, newVel.z * 0.95));
 			// sphParticles[i]->setVelocity(glm::vec3(vel.x, -vel.y * 0.2, vel.z));
 			// should perform some operation on the velocity and pressure here as well.
+		}
+		else if (sphParticles[i]->getPosition().y + rad > _heightmap->getMaxHeight() - 1)
+		{
+			sphParticles[i]->setPosition(glm::vec3(pos.x, _heightmap->getMaxHeight() - 1 - rad * 2, pos.z));
+			sphParticles[i]->setVelocity(glm::vec3(vel.x * 0.95, -vel.y * 0.15, vel.z * 0.95));
 		}
 
 		// Update position
@@ -245,6 +265,9 @@ void ParticleGenerator::updateParticles(float deltaTime, float time)
 
 		Cell* cell = grid.getCellFromPosition(sphParticles[particleID]->getPosition());
 		std::vector<SphParticle*> parts = grid.getNeighbouringSPHPaticlesInRadius(sphParticles[particleID]);
+		std::cout << parts.size() << "neighbours" << std::endl;
+		//if (sphParticles[particleID]->getDensity() > settings.restDensity)
+		std::cout << sphParticles[particleID]->getDensity() << "density" << std::endl;
 		sphParticleDebugs[particleID].isNearestNeighbourTarget = true;
 		for (int i = 0; i < parts.size(); i++)
 		{

@@ -158,7 +158,6 @@
     <ClCompile Include="mesh\quad_mesh.cpp" />
     <ClCompile Include="mesh\sphere.cpp" />
     <ClCompile Include="mesh\terrain_mesh.cpp" />
-    <ClCompile Include="neighborTable.cpp" />
     <ClCompile Include="particle.cpp" />
     <ClCompile Include="particle_generator.cpp" />
     <ClCompile Include="shader\shader.cpp" />
@@ -189,7 +188,6 @@
     <ClInclude Include="mesh\quad_mesh.h" />
     <ClInclude Include="mesh\sphere.h" />
     <ClInclude Include="mesh\terrain_mesh.h" />
-    <ClInclude Include="neighborTable.h" />
     <ClInclude Include="particle.h" />
     <ClInclude Include="particle_generator.h" />
     <ClInclude Include="shader\shader.h" />

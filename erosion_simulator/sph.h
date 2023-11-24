@@ -11,27 +11,19 @@ struct SPHSettings
         float h, float g, float tension);
 
     glm::mat4 sphereScale;
-    float poly6, spikyGrad, spikyLap, gasConstant, mass, h2, selfDens,
-          restDensity, viscosity, h, g, tension, massPoly6Product;
+    float pressureMultiplier, mass, h2,
+          restDensity, viscosity, h, g, tension;
 };
 
-
-void parallelForces(
-    SphParticle* particle, std::vector<SphParticle*> neighbours,
+void calculateDensity(SphParticle* particle, std::vector<SphParticle*> neighbours,
     const SPHSettings& settings);
 
-void parallelUpdateParticlePositions(
-    std::vector<SphParticle*> particles, const SPHSettings& settings, const float& deltaTime);
-
-void parallelDensityAndPressures(
-    SphParticle* particle, std::vector<SphParticle*> neighbours,
+void calculatePressure(SphParticle* particle, std::vector<SphParticle*> neighbours,
     const SPHSettings& settings);
 
-/// Update attrs of particles in place.
-void updateParticles(
-    SphParticle* particles, glm::mat4* particleTransforms,
-    const size_t particleCount, const SPHSettings& settings,
-    float deltaTime, const bool onGPU);
+void calculatePressureForce(SphParticle* particle, std::vector<SphParticle*> neighbours,
+    const SPHSettings& settings);
+
 
 
 #endif //SPH_SPH_H

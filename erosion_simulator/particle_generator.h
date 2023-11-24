@@ -33,6 +33,7 @@ public:
 	void drawTerrainParticles();
 	void drawGridDebug();
 	void updateParticles(float deltaTime, float time);
+	SPHSettings settings = SPHSettings(1, 1, 1, 1, 1, 0, 0.1f);
 private:
 
 	HeightMap* _heightmap;
@@ -55,7 +56,6 @@ private:
 	Mesh* particleMesh;
 	Mesh* terrainParticlesMesh;
 	Grid3D grid;
-	SPHSettings settings = SPHSettings(1, 1, 1, 1, 0.175, -9.8, 1);
 	
 };
 
