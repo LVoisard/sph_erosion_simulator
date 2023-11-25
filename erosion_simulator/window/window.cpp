@@ -235,13 +235,13 @@ void Window::ShowSimulationParameters(SPHSettings* settings, bool *open)
         ImGui::Text("Particle Parameters");
 
         ImGui::SliderFloat("Particle Mass", &settings->mass, 0.1, 10, "%.2f");
-        ImGui::SliderFloat("Rest Density", &settings->restDensity, 0.01, 1000, "%.2f");
-        ImGui::SliderFloat("Gas Constant", &settings->pressureMultiplier, 0.01, 10, "%.2f");
+        ImGui::SliderFloat("Rest Density", &settings->restDensity, 1, 3000, "%.2f");
+        ImGui::SliderFloat("Pressure Multiplier", &settings->pressureMultiplier, 1, 1000, "%.2f");
 
-        ImGui::SliderFloat("Viscosity", &settings->viscosity, 0.0f, 1.0f, "%.2f");
-        ImGui::SliderFloat("Smoothing Radius", &settings->h, 0.001, 10, "%.3f");
+        ImGui::SliderFloat("Viscosity", &settings->viscosity, 0.0f, 100.0f, "%.2f");
+        ImGui::SliderFloat("Smoothing Radius", &settings->h, 0.001, 1, "%.3f");
         ImGui::SliderFloat("Gravity Constant", &settings->g, -9.8, 9.8, "%.1f");
-        ImGui::SliderFloat("Surface Tension", &settings->tension, 0.0, 10.0f, "%.2f");
+        ImGui::SliderFloat("Time Step", &settings->timeStep, 0.0, 10.0f, "%.2f");
 
         ImGui::End();
     }

@@ -8,22 +8,20 @@ struct SPHSettings
 {
     SPHSettings(
         float mass, float restDensity, float gasConst, float viscosity,
-        float h, float g, float tension);
+        float h, float g, float timeStep);
 
     glm::mat4 sphereScale;
     float pressureMultiplier, mass, h2,
-          restDensity, viscosity, h, g, tension;
+          restDensity, viscosity, h, g, timeStep;
 };
 
-void calculateDensity(SphParticle* particle, std::vector<SphParticle*> neighbours,
-    const SPHSettings& settings);
+void calculateDensity(SphParticle* particle, std::vector<SphParticle*> neighbours, const SPHSettings& settings);
 
-void calculatePressure(SphParticle* particle, std::vector<SphParticle*> neighbours,
-    const SPHSettings& settings);
+void calculatePressure(SphParticle* particle, std::vector<SphParticle*> neighbours, const SPHSettings& settings);
 
-void calculatePressureForce(SphParticle* particle, std::vector<SphParticle*> neighbours,
-    const SPHSettings& settings);
+void calculatePressureForce(SphParticle* particle, std::vector<SphParticle*> neighbours, const SPHSettings& settings);
 
+void calculateViscosity(SphParticle* particle, std::vector<SphParticle*> neighbours, const SPHSettings& settings);
 
 
 #endif //SPH_SPH_H

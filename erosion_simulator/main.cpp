@@ -251,7 +251,7 @@ int main(int argc, char* argv[])
 
 	terrainMesh = new TerrainMesh(map.getWidth(), map.getLength(), &map.heightMap, mainShader);
 
-	float particleRadius = 0.1;
+	float particleRadius = 0.05;
 	sphere = new Sphere(glm::vec3(0), particleRadius, waterShader);
 	boundaryParticleSphere = new Sphere(glm::vec3(0), particleRadius, boundaryParticleShader);
 
@@ -260,7 +260,7 @@ int main(int argc, char* argv[])
 	boundaryParticleSphere->init();
 
 	float terrainSpacing = 1;
-	float cellSize = 1;
+	float cellSize = 0.2;
 
 	// this is cubed (3 = 27 in one cube)
 	int numInOneCell = 2;
