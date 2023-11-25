@@ -2,23 +2,31 @@
 #include "mesh/mesh.h"
 #include "glm/glm.hpp"
 
+
 class Particle
 {
 public:
-	Particle(glm::vec3 position, float radius);
-	virtual void update(float deltaTime, float time);
-	void setPosition(glm::vec3 position);	
-	glm::vec3 getPosition() { return position; }
+    Particle(glm::vec3 position, float radius);
 
-	float getRadius() { return radius; }
-	
-	int getId() { return id; }
+    // Virtual destructor in case this class is intended to be a base class
+    virtual ~Particle() {}
+
+    virtual void update(float deltaTime, float time);
+
+    // Setter functions
+    void setPosition(glm::vec3 newPosition);
+    void setRadius(float newRadius);
+    void setId(int newId);
+
+    // Getter functions
+    glm::vec3 getPosition() const { return position; }
+    float getRadius() const { return radius; }
+    int getId() const { return id; }
 
 protected:
-	glm::vec3 position;
-	float radius;
-
-	int id;	// largely used for debug purposes
-	static int next_id; // Ids are assigned on creation, with no overlap. This keeps track of id that will be assigned to the next created particle.
+    glm::vec3 position;
+    float radius;
+    int id; // largely used for debug purposes
+    static int next_id; // Ids are assigned on creation, with no overlap. This keeps track of the id that will be assigned to the next created particle.
 };
 

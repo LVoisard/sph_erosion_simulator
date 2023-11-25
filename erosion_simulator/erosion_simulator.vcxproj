@@ -162,6 +162,7 @@
     <ClCompile Include="particle_generator.cpp" />
     <ClCompile Include="shader\shader.cpp" />
     <ClCompile Include="skybox\skybox.cpp" />
+    <ClCompile Include="sph.cpp" />
     <ClCompile Include="sph_particle.cpp" />
     <ClCompile Include="terrain_particle.cpp" />
     <ClCompile Include="texture\texture.cpp" />
@@ -192,6 +193,7 @@
     <ClInclude Include="shader\shader.h" />
     <ClInclude Include="simulation_parameters_ui.h" />
     <ClInclude Include="skybox\skybox.h" />
+    <ClInclude Include="sph.h" />
     <ClInclude Include="sph_particle.h" />
     <ClInclude Include="terrain_particle.h" />
     <ClInclude Include="texture\texture.h" />

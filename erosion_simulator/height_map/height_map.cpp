@@ -59,7 +59,7 @@ void HeightMap::loadHeightMapFromFile(std::string fileName)
 		for (int x = 0; x < width; x++)
 		{
 			const stbi_uc* p = img + (y * height + x);
-			
+
 			float h = p[0] / 255.0f * maxHeight;
 			heightMap[x][y] = h;
 		}
@@ -174,7 +174,7 @@ void HeightMap::saveHeightMapPPM(std::string fileName)
 		}
 	}
 
-	save_ppm(fileName +".ppm", buffer, width, length);
+	save_ppm(fileName + ".ppm", buffer, width, length);
 	buffer.clear();
 }
 
@@ -195,6 +195,11 @@ void HeightMap::saveHeightMapPPM(std::string fileName, float*** hmp)
 	buffer.clear();
 }
 
+
+bool HeightMap::pointInBounds(float x, float z) const
+{
+	return x >= getMinX() && x < getMaxX() && z >= getMinZ() && z < getMaxZ();
+}
 
 void HeightMap::generateHeightMap()
 {
@@ -285,8 +290,10 @@ float HeightMap::sampleHeightAtPosition(float x, float y) const {
 	// We sample the four corners of that cell and return an average weighted
 	// by how close the position we sample is to each corner.
 
+
 	x += offset.x;
 	y += offset.y;
+
 
 	// Float casted to int are truncated towards 0.
 	int xLeft = (int)x;
@@ -299,7 +306,10 @@ float HeightMap::sampleHeightAtPosition(float x, float y) const {
 	// This will act as the vertical weight, indicating how close the point is to one side.
 	float yWeight = y - yDown;  // must be between [0, 1).
 
+
 	// Sample the heightmap at each of the cell's corner.
+	if (xLeft < 0 || xLeft >= width || yDown < 0 || yDown >= length) return 0;
+	if (xRight < 0 || xRight >= width || yUp < 0 || yUp >= length) return 0;
 	float bottomLeftHeight = heightMap[xLeft][yDown];
 	float bottomRightHeight = heightMap[xRight][yDown];
 	float topLeftHeight = heightMap[xLeft][yUp];
@@ -313,4 +323,40 @@ float HeightMap::sampleHeightAtPosition(float x, float y) const {
 
 	// Return the average.
 	return (bottomLeftHeight + bottomRightHeight + topLeftHeight + topRightHeight);
+
+}
+
+glm::vec3 HeightMap::sampleNormalAtPosition(float x, float y) const
+{
+	// this wont be the exact normal, but can do 
+
+	// Float casted to int are truncated towards 0.
+	int xLeft = (int)x;
+	int xRight = xLeft + 1;
+	// This will act as the horizontal weight, indicating how close the point is to one side.
+	float xWeight = x - xLeft; // must be between [0, 1).
+
+	int yDown = (int)y;
+	int yUp = yDown + 1;
+	// This will act as the vertical weight, indicating how close the point is to one side.
+	float yWeight = y - yDown;  // must be between [0, 1).
+
+	// Sample the heightmap at each of the cell's corner.
+	float newxLeft = xLeft < 0 ? x : xLeft;
+	float newxRight = xRight >= width ? x : xRight;
+	float newyUp = yUp >= length ? y : yUp;
+	float newyDown = yDown < 0 ? y : yDown;
+
+	glm::vec3 left(newxLeft, sampleHeightAtPosition(newxLeft, y), y);
+	glm::vec3 rightHeight(newxRight, sampleHeightAtPosition(newxRight, y), y);
+	glm::vec3 topHeight(x, sampleHeightAtPosition(x, newyUp), newyUp);
+	glm::vec3 bottomHeight(x, sampleHeightAtPosition(x, newyDown), newyDown);
+
+	glm::vec3 normal = glm::cross(glm::normalize(rightHeight - left), glm::normalize(topHeight - bottomHeight));
+
+	// Adjust the weight of each sample by how close the target position is to it.
+
+
+	// Return the average.
+	return normal;
 }

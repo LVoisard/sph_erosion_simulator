@@ -1,4 +1,5 @@
 #pragma once
+#include "sph.h"
 #include "sph_particle.h"
 #include "terrain_particle.h"
 #include "mesh/mesh.h"
@@ -32,6 +33,8 @@ public:
 	void drawTerrainParticles();
 	void drawGridDebug();
 	void updateParticles(float deltaTime, float time);
+	SPHSettings settings = SPHSettings(1, 478, 100, 50, 0.2, -9.8, 0.0045f);
+
 private:
 
 	HeightMap* _heightmap;
@@ -49,6 +52,7 @@ private:
 	std::vector<glm::mat4> particleModelsTerrain;
 	std::vector<SPHParticleDebug> sphParticleDebugs;
 	std::vector<BoundaryParticleDebug> boundaryParticleDebugs;
+
 	Shader shader;
 	Mesh* particleMesh;
 	Mesh* terrainParticlesMesh;

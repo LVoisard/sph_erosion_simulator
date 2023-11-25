@@ -129,7 +129,7 @@ void HandleHeightmapResets()
 
 		for (int y = 0; y < map.getLength(); y++) {
 			for (int x = 0; x < map.getWidth(); x++) {
-				double color = std::clamp((double)(terrainMesh->getPositionAtIndex(x,y).y + map.getMinHeight()) / (double)(map.getMaxHeight() + map.getMinHeight()), 0.0, 1.0);
+				double color = std::clamp((double)(terrainMesh->getPositionAtIndex(x, y).y + map.getMinHeight()) / (double)(map.getMaxHeight() + map.getMinHeight()), 0.0, 1.0);
 				buffer[3 * y * map.getWidth() + 3 * x + 0] = color;
 				buffer[3 * y * map.getWidth() + 3 * x + 1] = color;
 				buffer[3 * y * map.getWidth() + 3 * x + 2] = color;
@@ -144,7 +144,7 @@ void HandleHeightmapResets()
 }
 void HandleKeyboardInputs()
 {
-	
+
 }
 
 void HandleCamera(float deltaTime)
@@ -211,7 +211,7 @@ void UpdateShaders(glm::mat4& view, glm::mat4& proj, glm::mat4& model, float& de
 		sphParticles->drawTerrainParticles();
 		boundaryParticleShader.stop();
 	}
-	
+
 }
 
 int main(int argc, char* argv[])
@@ -250,8 +250,8 @@ int main(int argc, char* argv[])
 	// initModel();
 
 	terrainMesh = new TerrainMesh(map.getWidth(), map.getLength(), &map.heightMap, mainShader);
-	
-	float particleRadius = 0.1;
+
+	float particleRadius = 0.05;
 	sphere = new Sphere(glm::vec3(0), particleRadius, waterShader);
 	boundaryParticleSphere = new Sphere(glm::vec3(0), particleRadius, boundaryParticleShader);
 
@@ -260,7 +260,7 @@ int main(int argc, char* argv[])
 	boundaryParticleSphere->init();
 
 	float terrainSpacing = 1;
-	float cellSize = 2;
+	float cellSize = 0.2;
 
 	// this is cubed (3 = 27 in one cube)
 	int numInOneCell = 2;
@@ -283,14 +283,14 @@ int main(int argc, char* argv[])
 			fpsTimer = 0;
 		}
 		fpsTimer += deltaTime;
-			
+
 		HandleHeightmapResets();
 		// stop taking input
 		if (!window.showSaveMenu) {
 			HandleKeyboardInputs();
 			HandleCamera(deltaTime);
 		}
-		
+
 
 
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -303,11 +303,11 @@ int main(int argc, char* argv[])
 		glm::mat4 view = camera.getViewMatrix();
 
 		sphParticles->updateParticles(deltaTime, timePast);
-		
+
 		// drawing
 		UpdateShaders(view, proj, model, deltaTime);
 
-		// window.Menu(erosionModel, simParams);
+		window.Menu(&(sphParticles->settings), simParams);
 
 		ImGui::Render();
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
@@ -318,9 +318,9 @@ int main(int argc, char* argv[])
 		window.pollEvents();
 	}
 
-	//ImGui_ImplOpenGL3_Shutdown();
-	//ImGui_ImplGlfw_Shutdown();
-	//ImGui::DestroyContext();
+	ImGui_ImplOpenGL3_Shutdown();
+	ImGui_ImplGlfw_Shutdown();
+	ImGui::DestroyContext();
 
 	// glfw: terminate, clearing all previously allocated GLFW resources.
 	// ------------------------------------------------------------------

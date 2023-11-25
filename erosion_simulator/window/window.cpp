@@ -154,7 +154,7 @@ void Window::scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 }
 
 
-void Window::Menu(ErosionModel* model, SimulationParametersUI* params)
+void Window::Menu(SPHSettings* settings, SimulationParametersUI* params)
 {
     if (ImGui::BeginMainMenuBar())
     {
@@ -173,10 +173,9 @@ void Window::Menu(ErosionModel* model, SimulationParametersUI* params)
         if (ImGui::BeginMenu("Tools"))
         {
             ImGui::MenuItem("Simulation Parameters", NULL, &showSimulationParameters);
-            ImGui::MenuItem("Paint Brush Settings", NULL, &showPaintBrushMenu);
             ImGui::EndMenu();
         }
-        if (ImGui::BeginMenu("Debug")) 
+        /*if (ImGui::BeginMenu("Debug")) 
         {
             if (ImGui::BeginMenu("Terrain Debug Modes"))
             {
@@ -219,119 +218,30 @@ void Window::Menu(ErosionModel* model, SimulationParametersUI* params)
                 ImGui::EndMenu();
             }
             ImGui::EndMenu();
-        }
+        }*/
         ImGui::EndMainMenuBar();
     }   
 
-    if (showSimulationParameters) ShowSimulationParameters(model, params, &showSimulationParameters);
-    if (showPaintBrushMenu) ShowPaintBrushMenu(model, params, &showPaintBrushMenu);
-    if (showSaveMenu) ShowSaveMenu(params, &showSaveMenu);
+    if (showSimulationParameters) ShowSimulationParameters(settings, &showSimulationParameters);
+    //if (showPaintBrushMenu) ShowPaintBrushMenu(model, params, &showPaintBrushMenu);
+    //if (showSaveMenu) ShowSaveMenu(params, &showSaveMenu);
 }
 
-void Window::ShowSimulationParameters(ErosionModel* model, SimulationParametersUI* params, bool *open)
+void Window::ShowSimulationParameters(SPHSettings* settings, bool *open)
 {
-    static std::string waterDirText = "North";
     if (ImGui::Begin("Simulation Parameters", open))
     {
-        ImGui::Checkbox("Enable Simulation", &model->isModelRunning);
-        ImGui::Checkbox("Enable Rain", &model->isRaining);
-        ImGui::Checkbox("Enable Sediment Slippage", &model->useSedimentSlippage);
-
         ImGui::Spacing();
+        ImGui::Text("Particle Parameters");
 
-        ImGui::SliderInt("Simulation Speed", &model->simulationSpeed, 1, 10);
-        ImGui::SliderInt("Rain Intensity", &model->rainIntensity, 1, 10);
-        ImGui::SliderInt("Rain Amount", &model->rainAmount, 1, 10);
+        ImGui::SliderFloat("Particle Mass", &settings->mass, 0.1, 10, "%.2f");
+        ImGui::SliderFloat("Rest Density", &settings->restDensity, 1, 3000, "%.2f");
+        ImGui::SliderFloat("Pressure Multiplier", &settings->pressureMultiplier, 1, 1000, "%.2f");
 
-        ImGui::SliderFloat("Evaporation Rate", &model->evaporationRate, 0.0f, 1.0f, "%.2f");
-        ImGui::SliderFloat("Sea Level", &model->seaLevel, -100, 100, "%.0f");
-        ImGui::SliderFloat("Slippage Angle", &model->slippageAngle, 0, 89, "%.0f");
-        ImGui::SliderFloat("Sediment Capacity", &model->sedimentCapacity, 0.0f, 1.0f, "%.2f");
-
-        ImGui::Spacing();
-        ImGui::Spacing();
-        ImGui::Spacing();
-
-        ImGui::Text("Water Parameters");
-        ImGui::Checkbox("Enable Ocean Waves", &model->generateWaves);
-
-        ImGui::SliderFloat("Wave Strength", &model->waveStrength, 5.0f, 100.0f, "%.2f");
-        ImGui::SliderFloat("Wave Interval", &model->waveInterval, 0.1f, 10.0f, "%.2f");
-
-
-        ImGui::Text(std::string("Wave Direction: " + waterDirText).c_str());
-        if (ImGui::Button("North"))
-        {
-            waterDirText = "North";
-            model->waveDirection = WaveDirection::NORTH;
-        }
-        if (ImGui::Button("South"))
-        {
-            waterDirText = "South";
-            model->waveDirection = WaveDirection::SOUTH;
-        }
-        if (ImGui::Button("East"))
-        {
-            waterDirText = "East";
-            model->waveDirection = WaveDirection::EAST;
-        }
-        if (ImGui::Button("West"))
-        {
-            waterDirText = "West";
-            model->waveDirection = WaveDirection::WEST;
-        }
-
-        ImGui::End();
-    }
-}
-
-void Window::ShowPaintBrushMenu(ErosionModel* model, SimulationParametersUI* params, bool* open)
-{
-    static std::string currentBrush = "Water Add";
-    if (ImGui::Begin("Paint Brush Settings", open))
-    {
-        ImGui::Checkbox("Enable Paint Brush", &model->castRays);
-
-        ImGui::SliderFloat("Brush Size", &model->brushRadius, 1.f, 50.0f);
-        ImGui::SliderFloat("Brush Intensity", &model->brushIntensity, 1.f, 50.0f);
-
-        ImGui::Separator();
-
-        ImGui::Text(std::string("Current Brush: " + currentBrush).c_str());
-
-        if (ImGui::Button("Water Add"))
-        {
-            model->paintMode = PaintMode::WATER_ADD;
-            currentBrush = "Water Add";
-        }
-        if (ImGui::Button("Water Remove"))
-        {
-            model->paintMode = PaintMode::WATER_REMOVE;
-            currentBrush = "Water Remove";
-        }
-        if (ImGui::Button("Water Source"))
-        {
-            model->paintMode = PaintMode::WATER_SOURCE;
-            currentBrush = "Water Source";
-        }
-        if (ImGui::Button("Terrain Add"))
-        {
-            model->paintMode = PaintMode::TERRAIN_ADD;
-            currentBrush = "Terrain Add";
-        }
-        if (ImGui::Button("Terrain Remove"))
-        {
-            model->paintMode = PaintMode::TERRAIN_REMOVE;
-            currentBrush = "Terrain Remove";
-        }
-
-        ImGui::Separator();
-
-        if(ImGui::Button("Remove All Sources"))
-        {
-            model->waterSources.clear();
-        }
-        
+        ImGui::SliderFloat("Viscosity", &settings->viscosity, 0.0f, 100.0f, "%.2f");
+        ImGui::SliderFloat("Smoothing Radius", &settings->h, 0.001, 1, "%.3f");
+        ImGui::SliderFloat("Gravity Constant", &settings->g, -9.8, 9.8, "%.1f");
+        ImGui::SliderFloat("Time Step", &settings->timeStep, 0.0, 10.0f, "%.2f");
 
         ImGui::End();
     }
