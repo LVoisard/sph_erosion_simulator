@@ -13,18 +13,18 @@ ParticleGenerator::ParticleGenerator(Shader& shader, Mesh* sphMesh, Mesh* bounda
 	float height = _heightmap->getHeight();	
 
 	std::cout << " height " << (mapWidth - 1) << std::endl;
-	float sphOffset = (cellSize / 2 / (numPerSquare));
-	for (int x = 0; x < (mapWidth - 1) / cellSize * numPerSquare; x++)
+	float sphOffset = (cellSize / 2 / (numPerSquare) / 8);
+	for (int x = 0; x < (mapWidth - 1) / cellSize * numPerSquare / 4; x++)
 	{
-		for (int y = 0; y < 2 * (numPerSquare); y++)
+		for (int y = 0; y < 8 * (numPerSquare); y++)
 		{
-			for (int z = 0; z < (mapLength - 1) / cellSize * numPerSquare; z++)
+			for (int z = 0; z < (mapLength - 1) / cellSize * numPerSquare / 4; z++)
 			{
 				//((maxHeight - y) + (float) (y * cellSize / 2 / (numPerSquare)) - (cellSize / 2 / (numPerSquare)))
 				glm::vec3 pos(
-					(float)x * cellSize / (numPerSquare) - (float)(mapWidth - 1) / 2 + sphOffset,
-					(float)((maxHeight - 1 - y * cellSize / numPerSquare)) - sphOffset,
-					(float)z * cellSize / (numPerSquare) - (float)(mapLength - 1) / 2 + sphOffset);
+					(float)x * cellSize / (numPerSquare) - (float)(mapWidth - 1) / 8 + sphOffset,
+					(float)(((maxHeight - 1)/2 - y * cellSize / numPerSquare)) - sphOffset,
+					(float)z * cellSize / (numPerSquare) - (float)(mapLength - 1) / 8 + sphOffset);
 				SphParticle* sphPart = new SphParticle(pos * terrainSpacing, particleRadius);
 				sphParticles.push_back(sphPart);
 				particleModels.push_back(glm::translate(glm::mat4(1), sphPart->getPosition()));
@@ -167,16 +167,12 @@ void ParticleGenerator::updateParticles(float deltaTime, float time)
 		std::pair<SphParticle*, std::vector<SphParticle*>> pair(sphParticles[i], parts);
 		particleNeigbours.insert(pair);
 		calculateDensity(sphParticles[i], particleNeigbours.at(sphParticles[i]), settings);
-		calculatePressure(sphParticles[i], particleNeigbours.at(sphParticles[i]), settings);
-
 	}
 	for (int i = 0; i < sphParticles.size(); i++)
 	{
 		// before updating particle position
 		calculatePressureForce(sphParticles[i], particleNeigbours.at(sphParticles[i]), settings);
-	}
-	for (int i = 0; i < sphParticles.size(); i++)
-	{
+
 		// before updating particle position
 		calculateViscosity(sphParticles[i], particleNeigbours.at(sphParticles[i]), settings);
 	}
@@ -214,13 +210,14 @@ void ParticleGenerator::updateParticles(float deltaTime, float time)
 		vel = sphParticles[i]->getVelocity();
 		// if the particle is below the terrain, bring it back.
 		// UNCOMMENT BELOW
-		float terrainHeightAtPosition = 0;// _heightmap->sampleHeightAtPosition(pos.x, pos.z);
+		float terrainHeightAtPosition = _heightmap->sampleHeightAtPosition(pos.x, pos.z);
 		if (sphParticles[i]->getPosition().y - rad <= terrainHeightAtPosition) {
 
-			glm::vec3 normal = glm::vec3(0, 1, 0); // _heightmap->sampleNormalAtPosition(pos.x, pos.z);
+			glm::vec3 normal = _heightmap->sampleNormalAtPosition(pos.x, pos.z);
+			float yStrength = std::clamp(1 - glm::dot(normal, glm::normalize(sphParticles[i]->getVelocity())), 0.05f, 0.95f);
 			sphParticles[i]->setPosition(glm::vec3(pos.x, terrainHeightAtPosition + rad, pos.z));
 			glm::vec3 newVel = glm::reflect(sphParticles[i]->getVelocity(), normal);
-			sphParticles[i]->setVelocity(glm::vec3(newVel.x * 0.5f, newVel.y * 0.05f, newVel.z * 0.5f));
+			sphParticles[i]->setVelocity(glm::vec3(newVel.x * 0.95f, newVel.y * yStrength, newVel.z * 0.95f));
 			// sphParticles[i]->setVelocity(glm::vec3(vel.x, -vel.y * 0.2, vel.z));
 			// should perform some operation on the velocity and pressure here as well.
 		}
@@ -271,6 +268,7 @@ void ParticleGenerator::updateParticles(float deltaTime, float time)
 	std::cout << parts.size() << "neighbours" << std::endl;
 	//if (sphParticles[particleID]->getDensity() > settings.restDensity)
 	//std::cout << sphParticles[particleID]->getDensity() << " density" << std::endl;
+	//std::cout << sphParticles[particleID]->getNearDensity() << " near density" << std::endl;
 	//std::cout << sphParticles[particleID]->getPressure() << " pressure" << std::endl;
 	//std::cout << sphParticles[particleID]->getForce().x << " " << sphParticles[particleID]->getForce().y << " " << sphParticles[particleID]->getForce().z << " force" << std::endl;
 	//std::cout << sphParticles[particleID]->getVelocity().x << " " << sphParticles[particleID]->getVelocity().y << " " << sphParticles[particleID]->getVelocity().z << " velocity" << std::endl;

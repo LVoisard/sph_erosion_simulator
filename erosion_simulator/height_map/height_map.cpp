@@ -347,13 +347,26 @@ glm::vec3 HeightMap::sampleNormalAtPosition(float x, float y) const
 	float newyUp = yUp >= length ? y : yUp;
 	float newyDown = yDown < 0 ? y : yDown;
 
-	glm::vec3 left(newxLeft, sampleHeightAtPosition(newxLeft, y), y);
-	glm::vec3 rightHeight(newxRight, sampleHeightAtPosition(newxRight, y), y);
-	glm::vec3 topHeight(x, sampleHeightAtPosition(x, newyUp), newyUp);
-	glm::vec3 bottomHeight(x, sampleHeightAtPosition(x, newyDown), newyDown);
+	//if (xLeft < 0 || xLeft >= width || yDown < 0 || yDown >= length) return 0;
+	//if (xRight < 0 || xRight >= width || yUp < 0 || yUp >= length) return 0;
+	
+	glm::vec3 self = glm::vec3(x, sampleHeightAtPosition(x, y), y);
+	glm::vec3 left = glm::vec3(self);
+	glm::vec3 right = glm::vec3(self);
+	glm::vec3 top = glm::vec3(self);
+	glm::vec3 bottom = glm::vec3(self);
 
-	glm::vec3 normal = glm::cross(glm::normalize(rightHeight - left), glm::normalize(topHeight - bottomHeight));
+	if (pointInBounds(newxLeft,y))
+		left = glm::vec3(newxLeft, sampleHeightAtPosition(newxLeft, y), y);
+	if (pointInBounds(newxRight, y))
+		right = glm::vec3(newxRight, sampleHeightAtPosition(newxRight, y), y);
+	if (pointInBounds(x, newyUp))
+		top = glm::vec3(x, sampleHeightAtPosition(x, newyUp), newyUp);
+	if (pointInBounds(x, newyDown))
+		bottom = glm::vec3(x, sampleHeightAtPosition(x, newyDown), newyDown);
 
+	glm::vec3 normal = glm::cross(glm::normalize(left - right), glm::normalize(bottom - top));
+	
 	// Adjust the weight of each sample by how close the target position is to it.
 
 

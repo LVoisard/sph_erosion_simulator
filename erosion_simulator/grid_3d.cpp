@@ -166,7 +166,7 @@ std::vector<SphParticle*> Grid3D::getNeighbouringSPHPaticlesInRadius(Particle* p
 	if (current == nullptr) return parts;
 	std::vector<Cell*> cells = getCellNeighbours(current);
 
-	float searchRadius2 = particleSearchRadius * particleSearchRadius + particle->getRadius() * particle->getRadius();
+	float searchRadius2 = particleSearchRadius * particleSearchRadius;
 
 	for (int i = 0; i < current->sphParticles.size(); i++)
 	{
