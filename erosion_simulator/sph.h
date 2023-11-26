@@ -17,8 +17,6 @@ struct SPHSettings
 
 void calculateDensity(SphParticle* particle, std::vector<SphParticle*> neighbours, const SPHSettings& settings);
 
-void calculatePressure(SphParticle* particle, std::vector<SphParticle*> neighbours, const SPHSettings& settings);
-
 void calculatePressureForce(SphParticle* particle, std::vector<SphParticle*> neighbours, const SPHSettings& settings);
 
 void calculateViscosity(SphParticle* particle, std::vector<SphParticle*> neighbours, const SPHSettings& settings);

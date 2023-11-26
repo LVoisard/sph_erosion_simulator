@@ -167,8 +167,6 @@ void ParticleGenerator::updateParticles(float deltaTime, float time)
 		std::pair<SphParticle*, std::vector<SphParticle*>> pair(sphParticles[i], parts);
 		particleNeigbours.insert(pair);
 		calculateDensity(sphParticles[i], particleNeigbours.at(sphParticles[i]), settings);
-		calculatePressure(sphParticles[i], particleNeigbours.at(sphParticles[i]), settings);
-
 	}
 	for (int i = 0; i < sphParticles.size(); i++)
 	{
@@ -214,13 +212,13 @@ void ParticleGenerator::updateParticles(float deltaTime, float time)
 		vel = sphParticles[i]->getVelocity();
 		// if the particle is below the terrain, bring it back.
 		// UNCOMMENT BELOW
-		float terrainHeightAtPosition = 0;// _heightmap->sampleHeightAtPosition(pos.x, pos.z);
+		float terrainHeightAtPosition = _heightmap->sampleHeightAtPosition(pos.x, pos.z);
 		if (sphParticles[i]->getPosition().y - rad <= terrainHeightAtPosition) {
 
-			glm::vec3 normal = glm::vec3(0, 1, 0); // _heightmap->sampleNormalAtPosition(pos.x, pos.z);
+			glm::vec3 normal = _heightmap->sampleNormalAtPosition(pos.x, pos.z);
 			sphParticles[i]->setPosition(glm::vec3(pos.x, terrainHeightAtPosition + rad, pos.z));
 			glm::vec3 newVel = glm::reflect(sphParticles[i]->getVelocity(), normal);
-			sphParticles[i]->setVelocity(glm::vec3(newVel.x * 0.5f, newVel.y * 0.05f, newVel.z * 0.5f));
+			sphParticles[i]->setVelocity(glm::vec3(newVel.x * 0.95f, newVel.y * 0.05f, newVel.z * 0.95f));
 			// sphParticles[i]->setVelocity(glm::vec3(vel.x, -vel.y * 0.2, vel.z));
 			// should perform some operation on the velocity and pressure here as well.
 		}

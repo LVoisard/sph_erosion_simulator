@@ -241,7 +241,7 @@ void Window::ShowSimulationParameters(SPHSettings* settings, bool *open)
         ImGui::SliderFloat("Viscosity", &settings->viscosity, 0.0f, 100.0f, "%.2f");
         ImGui::SliderFloat("Smoothing Radius", &settings->h, 0.001, 1, "%.3f");
         ImGui::SliderFloat("Gravity Constant", &settings->g, -9.8, 9.8, "%.1f");
-        ImGui::SliderFloat("Time Step", &settings->timeStep, 0.0, 10.0f, "%.2f");
+        ImGui::SliderFloat("Time Step", &settings->timeStep, 0.001, 0.5f, "%.3f");
 
         ImGui::End();
     }

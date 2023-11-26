@@ -70,28 +70,22 @@ void calculateDensity(SphParticle* particle, std::vector<SphParticle*> neighbour
 	for (int i = 0; i < neighbours.size(); i++) {
 
 		float dist = glm::length((neighbours[i]->getPosition() + neighbours[i]->getVelocity() * 0.0045f) - (particle->getPosition() + particle->getVelocity() * 0.0045f));
-		if (dist > settings.h + particle->getRadius()) continue;
-		density += settings.mass * kernelFuncPressure(settings.h + particle->getRadius(), dist); //kernel function
-		nearDensity += settings.mass * kernelFunc(settings.h + particle->getRadius(), dist); //kernel function
+		if (dist > settings.h) continue;
+		density += settings.mass * kernelFuncPressure(settings.h, dist); //kernel function
+		nearDensity += settings.mass * kernelFunc(settings.h, dist); //kernel function
 	}
 
 	// add particle self density
-	density += settings.mass * kernelFuncPressure(settings.h + particle->getRadius(), 0);
-	nearDensity += settings.mass * kernelFunc(settings.h + particle->getRadius(), 0); //kernel function
+	density += settings.mass * kernelFuncPressure(settings.h, 0);
+	nearDensity += settings.mass * kernelFunc(settings.h, 0); //kernel function
 
 	particle->setDensity(density);
 	particle->setNearDensity(nearDensity);
 }
 
-void calculatePressure(SphParticle* particle, std::vector<SphParticle*> neighbours,
-	const SPHSettings& settings)
-{
-	float pressure = 0;
-	for (int i = 0; i < neighbours.size(); i++)
-	{
-		pressure += (neighbours[i]->getDensity() - settings.restDensity) * settings.pressureMultiplier;
-	}
-	particle->setPressure(pressure);
+float getPressureFromDensity(float density, const SPHSettings& settings)
+{	
+	return (density - settings.restDensity) * settings.pressureMultiplier;
 }
 
 void calculatePressureForce(SphParticle* particle, std::vector<SphParticle*> neighbours, const SPHSettings& settings)
@@ -102,15 +96,15 @@ void calculatePressureForce(SphParticle* particle, std::vector<SphParticle*> nei
 	{
 		glm::vec3 ab = (neighbours[i]->getPosition() + neighbours[i]->getVelocity() * settings.timeStep) - (particle->getPosition() + particle ->getVelocity() * settings.timeStep);
 		float dist = glm::length(ab);
-		if (dist > settings.h + particle->getRadius()) continue;
+		if (dist > settings.h) continue;
 		glm::vec3 dir = ab / std::max(0.001f, dist);
-		
-		pressureForce += dir * kernelFuncPressureDerivative(settings.h + particle->getRadius(), dist) * settings.mass / neighbours[i]->getDensity();
+		float presure = (getPressureFromDensity(particle->getDensity(), settings) + getPressureFromDensity(neighbours[i]->getDensity(), settings)) / 2;
+		pressureForce += dir * kernelFuncPressureDerivative(settings.h, dist) * settings.mass * presure / neighbours[i]->getDensity();
 		// pressureForce += dir * kernelFuncPressure(settings.h + particle->getRadius(), dist) * settings.mass * presure / neighbours[i]->getDensity();
 	}
 
 
-	particle->setVelocity(particle->getVelocity() + pressureForce * particle->getPressure() / particle->getDensity() * settings.timeStep);
+	particle->setVelocity(particle->getVelocity() + pressureForce / particle->getDensity() * settings.timeStep);
 }
 
 void calculateViscosity(SphParticle* particle, std::vector<SphParticle*> neighbours, const SPHSettings& settings)
@@ -120,9 +114,9 @@ void calculateViscosity(SphParticle* particle, std::vector<SphParticle*> neighbo
 	{
 		glm::vec3 ab = (neighbours[i]->getPosition() + neighbours[i]->getVelocity() * settings.timeStep) - (particle->getPosition() + particle->getVelocity() * settings.timeStep) ;
 		float dist = glm::length(ab);
-		if (dist > settings.h + particle->getRadius()) continue;
+		if (dist > settings.h) continue;
 		
-		viscosityForce += (neighbours[i]->getVelocity() - particle->getVelocity()) / neighbours[i]->getDensity() * kernelFunc(settings.h + particle->getRadius(), dist) * settings.mass;
+		viscosityForce += (neighbours[i]->getVelocity() - particle->getVelocity()) / neighbours[i]->getDensity() * kernelFunc(settings.h, dist) * settings.mass;
 	}
 	
 	particle->setVelocity(particle->getVelocity() + viscosityForce * settings.viscosity * settings.timeStep);
