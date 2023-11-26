@@ -251,7 +251,7 @@ int main(int argc, char* argv[])
 
 	terrainMesh = new TerrainMesh(map.getWidth(), map.getLength(), &map.heightMap, mainShader);
 
-	float particleRadius = 0.1;
+	float particleRadius = 0.05;
 	sphere = new Sphere(glm::vec3(0), particleRadius, waterShader);
 	boundaryParticleSphere = new Sphere(glm::vec3(0), particleRadius, boundaryParticleShader);
 

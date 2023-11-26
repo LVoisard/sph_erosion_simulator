@@ -33,7 +33,7 @@ public:
 	void drawTerrainParticles();
 	void drawGridDebug();
 	void updateParticles(float deltaTime, float time);
-	SPHSettings settings = SPHSettings(1, 400, 295, 0.001, 0.2, -9.8, 0.0045f);
+	SPHSettings settings = SPHSettings(1, 630, 288, 2.25, 0.1, 0.2, -9.8, 0.0045f);
 
 private:
 
