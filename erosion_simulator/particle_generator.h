@@ -6,6 +6,7 @@
 #include "shader/shader.h"
 #include <vector>
 #include "grid_3d.h"
+#include "mesh/terrain_mesh.h"
 
 struct SPHParticleDebug {
 	int isNearestNeighbourTarget;
@@ -28,16 +29,18 @@ struct BoundaryParticleDebug {
 class ParticleGenerator
 {
 public:
-	ParticleGenerator(Shader& shader, Mesh* sphMesh, Mesh* boundaryMesh, HeightMap* map, float terrainSpacing, float cellSize, float particleRadius, int numPerSquare);
+	ParticleGenerator(Shader& shader, Mesh* sphMesh, Mesh* boundaryMesh, HeightMap* map, TerrainMesh* terrain, float terrainSpacing, float cellSize, float particleRadius, int numPerSquare, SPHSettings* settings);
 	void drawParticles();
 	void drawTerrainParticles();
 	void drawGridDebug();
 	void updateParticles(float deltaTime, float time);
-	SPHSettings settings = SPHSettings(1, 630, 288, 2.25, 0.1, 0.2, -9.8, 0.0045f);
 
 private:
 
 	HeightMap* _heightmap;
+	TerrainMesh* terrain;
+
+	SPHSettings* settings;
 
 	// instanced array
 	uint32_t sphBuffer = 0;

@@ -198,7 +198,7 @@ void HeightMap::saveHeightMapPPM(std::string fileName, float*** hmp)
 
 bool HeightMap::pointInBounds(float x, float z) const
 {
-	return x >= getMinX() && x < getMaxX() && z >= getMinZ() && z < getMaxZ();
+	return x > getMinX() && x < getMaxX() - 1 && z > getMinZ() && z < getMaxZ() - 1;
 }
 
 void HeightMap::generateHeightMap()
@@ -331,21 +331,16 @@ glm::vec3 HeightMap::sampleNormalAtPosition(float x, float y) const
 	// this wont be the exact normal, but can do 
 
 	// Float casted to int are truncated towards 0.
-	int xLeft = (int)x;
-	int xRight = xLeft + 1;
+	int xLeft = (int)(x - 1);
+	int xRight = (int)(x + 1);
 	// This will act as the horizontal weight, indicating how close the point is to one side.
-	float xWeight = x - xLeft; // must be between [0, 1).
 
-	int yDown = (int)y;
-	int yUp = yDown + 1;
+	int yDown = (int)(y - 1);
+	int yUp = (int)(y + 1);
 	// This will act as the vertical weight, indicating how close the point is to one side.
-	float yWeight = y - yDown;  // must be between [0, 1).
 
 	// Sample the heightmap at each of the cell's corner.
-	float newxLeft = xLeft < 0 ? x : xLeft;
-	float newxRight = xRight >= width ? x : xRight;
-	float newyUp = yUp >= length ? y : yUp;
-	float newyDown = yDown < 0 ? y : yDown;
+
 
 	//if (xLeft < 0 || xLeft >= width || yDown < 0 || yDown >= length) return 0;
 	//if (xRight < 0 || xRight >= width || yUp < 0 || yUp >= length) return 0;
@@ -356,16 +351,16 @@ glm::vec3 HeightMap::sampleNormalAtPosition(float x, float y) const
 	glm::vec3 top = glm::vec3(self);
 	glm::vec3 bottom = glm::vec3(self);
 
-	if (pointInBounds(newxLeft,y))
-		left = glm::vec3(newxLeft, sampleHeightAtPosition(newxLeft, y), y);
-	if (pointInBounds(newxRight, y))
-		right = glm::vec3(newxRight, sampleHeightAtPosition(newxRight, y), y);
-	if (pointInBounds(x, newyUp))
-		top = glm::vec3(x, sampleHeightAtPosition(x, newyUp), newyUp);
-	if (pointInBounds(x, newyDown))
-		bottom = glm::vec3(x, sampleHeightAtPosition(x, newyDown), newyDown);
+	if (xLeft >= -offset.x)
+		left = glm::vec3(xLeft, sampleHeightAtPosition(xLeft, y), y);
+	if (xRight <= width + offset.x)
+		right = glm::vec3(xRight, sampleHeightAtPosition(xRight, y), y);
+	if (yUp <= length + offset.y)
+		top = glm::vec3(x, sampleHeightAtPosition(x, yUp), yUp);
+	if (yDown >= - offset.y)
+		bottom = glm::vec3(x, sampleHeightAtPosition(x, yDown), yDown);
 
-	glm::vec3 normal = glm::cross(glm::normalize(left - right), glm::normalize(bottom - top));
+	glm::vec3 normal = glm::cross(glm::normalize(right - left), glm::normalize(top - bottom));
 	
 	// Adjust the weight of each sample by how close the target position is to it.
 

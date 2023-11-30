@@ -236,8 +236,8 @@ void Window::ShowSimulationParameters(SPHSettings* settings, bool *open)
 
         ImGui::SliderFloat("Particle Mass", &settings->mass, 0.1, 10, "%.2f");
         ImGui::SliderFloat("Rest Density", &settings->restDensity, 1, 3000, "%.2f");
-        ImGui::SliderFloat("Pressure Multiplier", &settings->pressureMultiplier, 1, 1000, "%.2f");
-        ImGui::SliderFloat("Near Pressure Multiplier", &settings->nearPressureMultiplier, 1, 100, "%.2f");
+        ImGui::SliderFloat("Pressure Multiplier", &settings->pressureMultiplier, 1, 1500, "%.2f");
+        ImGui::SliderFloat("Surface Tension Multiplier", &settings->surfaceTensionMultiplier, 0.001, 100, "%.3f");
 
         ImGui::SliderFloat("Viscosity", &settings->viscosity, 0.0f, 100.0f, "%.2f");
         ImGui::SliderFloat("Smoothing Radius", &settings->h, 0.001, 1, "%.3f");
