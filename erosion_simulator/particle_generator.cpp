@@ -17,7 +17,7 @@ ParticleGenerator::ParticleGenerator(Shader& shader, Mesh* sphMesh, Mesh* bounda
 	float sphOffset = (cellSize / 1.9 / (numPerSquare));
 	for (int x = 0; x < (mapWidth - 1) / cellSize * numPerSquare / 4; x++)
 	{
-		for (int y = 0; y < 8 * (numPerSquare); y++)
+		for (int y = 0; y < 4 * (numPerSquare); y++)
 		{
 			for (int z = 0; z < (mapLength - 1) / cellSize * numPerSquare / 4; z++)
 			{

@@ -71,12 +71,15 @@ void main()
 	// water velocity
 	if(waterDebugMode == 1) {
 		vec3 c;
-		if (maxSpeed / 2 >= fragLinearVelocity) {
-			float a = smoothstep(0.0, maxSpeed / 2, fragLinearVelocity);
-			c = mix(vec3(0,0.1,0.9), vec3(0,0.9,0.1), a);
+		if (maxSpeed / 3 >= fragLinearVelocity) {
+			float a = smoothstep(0.0, maxSpeed / 3, fragLinearVelocity);
+			c = mix(vec3(0,0.1,0.8), vec3(0,0.8,0.1), a);
+		} else if (maxSpeed / 3 >= fragLinearVelocity - maxSpeed / 3) {
+			float a = smoothstep(0.0, maxSpeed / 3, fragLinearVelocity - maxSpeed / 3);
+			c = mix(vec3(0,0.8,0.1), vec3(0.5,0.5,0), a);
 		} else {
-			float a = smoothstep(0.0, maxSpeed / 2, fragLinearVelocity - maxSpeed / 2);
-			c = mix(vec3(0,0.9,0.1), vec3(0.9,0.1,0), a);
+			float a = smoothstep(0.0, maxSpeed / 3, fragLinearVelocity - 2 * maxSpeed / 3);
+			c = mix(vec3(0.5,0.5,0), vec3(0.8,0.1,0), a);
 		}
 		fragColor = vec4(c, 1);
 		return;

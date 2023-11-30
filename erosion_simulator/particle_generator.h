@@ -36,6 +36,7 @@ public:
 	void drawTerrainParticles();
 	void drawGridDebug();
 	void updateParticles(float deltaTime, float time);
+	void addParticles();
 
 private:
 

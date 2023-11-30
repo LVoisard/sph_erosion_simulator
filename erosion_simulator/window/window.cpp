@@ -222,15 +222,17 @@ void Window::Menu(ErosionModel* model, SPHSettings* settings, SimulationParamete
         ImGui::EndMainMenuBar();
     }   
 
-    if (showSimulationParameters) ShowSimulationParameters(settings, &showSimulationParameters);
+    if (showSimulationParameters) ShowSimulationParameters(model, settings, &showSimulationParameters);
     //if (showPaintBrushMenu) ShowPaintBrushMenu(model, params, &showPaintBrushMenu);
     //if (showSaveMenu) ShowSaveMenu(params, &showSaveMenu);
 }
 
-void Window::ShowSimulationParameters(SPHSettings* settings, bool *open)
+void Window::ShowSimulationParameters(ErosionModel* model, SPHSettings* settings, bool *open)
 {
     if (ImGui::Begin("Simulation Parameters", open))
     {
+        ImGui::Checkbox("Simulation Running", &model->isSimRunning);
+
         ImGui::Spacing();
         ImGui::Text("Particle Parameters");
 

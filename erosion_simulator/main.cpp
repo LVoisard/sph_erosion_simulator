@@ -150,6 +150,12 @@ void HandleHeightmapResets()
 }
 void HandleKeyboardInputs()
 {
+	if (erosionModel.isSimRunning && window.getMouseButtonDown(GLFW_MOUSE_BUTTON_LEFT)) {
+		if (erosionModel.paintMode == PaintMode::WATER_ADD)
+		{
+
+		}
+	}
 }
 
 void HandleCamera(float deltaTime)
@@ -163,8 +169,8 @@ void HandleCamera(float deltaTime)
 
 	camera.update(deltaTime);
 
-	/*if (erosionModel->castRays && !camera.inFreeView())
-		raycastThroughScene();*/
+	if (erosionModel.castRays && !camera.inFreeView())
+		raycastThroughScene();
 }
 
 void UpdateShaders(glm::mat4& view, glm::mat4& proj, glm::mat4& model, float& deltaTime)
@@ -270,7 +276,7 @@ int main(int argc, char* argv[])
 	// this is cubed (3 = 27 in one cube)
 	int numInOneCell = 1;
 	float h = 0.2;
-	SPHSettings settings = SPHSettings(1, 880, 580, 0.25, 0.01, h, -9.8f, 0.0045f);
+	SPHSettings settings = SPHSettings(1, 880, 580, 0.25, 0.01, h, -9.8f, 0.032f);
 	sphParticles = new ParticleGenerator(defaultShader, sphere, boundaryParticleSphere, &map, terrainMesh, terrainSpacing, h, particleRadius, numInOneCell, &settings);
 
 	glm::mat4 proj = glm::mat4(1.0f);

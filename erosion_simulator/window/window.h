@@ -77,7 +77,7 @@ private:
 	double mouseDeltaY = 0;
 
 	
-	void ShowSimulationParameters(SPHSettings* params, bool* open);
+	void ShowSimulationParameters(ErosionModel* model, SPHSettings* params, bool* open);
 	void ShowPaintBrushMenu(ErosionModel* model, SimulationParametersUI* params, bool* open);
 	void ShowSaveMenu(SimulationParametersUI* params, bool* open);
 
