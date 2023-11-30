@@ -154,7 +154,7 @@ void Window::scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 }
 
 
-void Window::Menu(SPHSettings* settings, SimulationParametersUI* params)
+void Window::Menu(ErosionModel* model, SPHSettings* settings, SimulationParametersUI* params)
 {
     if (ImGui::BeginMainMenuBar())
     {
@@ -175,7 +175,7 @@ void Window::Menu(SPHSettings* settings, SimulationParametersUI* params)
             ImGui::MenuItem("Simulation Parameters", NULL, &showSimulationParameters);
             ImGui::EndMenu();
         }
-        /*if (ImGui::BeginMenu("Debug")) 
+        if (ImGui::BeginMenu("Debug")) 
         {
             if (ImGui::BeginMenu("Terrain Debug Modes"))
             {
@@ -218,7 +218,7 @@ void Window::Menu(SPHSettings* settings, SimulationParametersUI* params)
                 ImGui::EndMenu();
             }
             ImGui::EndMenu();
-        }*/
+        }
         ImGui::EndMainMenuBar();
     }   
 

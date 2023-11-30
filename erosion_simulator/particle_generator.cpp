@@ -1,6 +1,7 @@
 #include "particle_generator.h"
 #include <iostream>
 #include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtx/norm.hpp>
 #include <exception>
 #include <unordered_map>
 
@@ -77,10 +78,13 @@ ParticleGenerator::ParticleGenerator(Shader& shader, Mesh* sphMesh, Mesh* bounda
 	
 	glEnableVertexAttribArray(7);
 	glEnableVertexAttribArray(8);
+	glEnableVertexAttribArray(9);
 	glVertexAttribPointer(7, 1, GL_INT, GL_FALSE, sizeof(SPHParticleDebug), (void*)0);
 	glVertexAttribPointer(8, 1, GL_INT, GL_FALSE, sizeof(SPHParticleDebug), (void*)(sizeof(int)));
+	glVertexAttribPointer(9, 1, GL_FLOAT, GL_FALSE, sizeof(SPHParticleDebug), (void*)(sizeof(int) * 2));
 	glVertexAttribDivisor(7, 1);
 	glVertexAttribDivisor(8, 1);
+	glVertexAttribDivisor(9, 1);
 
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 
@@ -127,7 +131,7 @@ ParticleGenerator::ParticleGenerator(Shader& shader, Mesh* sphMesh, Mesh* bounda
 
 	std::vector<SphParticle*> sphParticleVector(sphParticles.begin(), sphParticles.end()); // turn vector<SphParticle*> into vector<Particle*> (implicit casting isn't possible)
 	std::vector<TerrainParticle*> terrainParticleVector(terrainParticles.begin(), terrainParticles.end());
-	grid = Grid3D(mapWidth - 1, mapLength - 1, height,terrainSpacing,  cellSize, sphParticleVector, terrainParticleVector, shader);
+	grid = Grid3D(mapWidth - 1, mapLength - 1, height, terrainSpacing,  cellSize, sphParticleVector, terrainParticleVector, shader);
 
 	//settings.restDensity = ((mapWidth - 1) * (mapLength - 1) * height) / (settings.mass * sphParticles.size()) * cellSize;
 
@@ -252,11 +256,13 @@ void ParticleGenerator::updateParticles(float deltaTime, float time)
 	int particleID = iter % sphParticles.size();
 
 	// debug all particles in one minute (of fps allows it)
+	std::cout << glm::length(sphParticles[0]->getVelocity()) << std::endl;
 
 	for (int i = 0; i < sphParticleDebugs.size(); i++)
 	{
 		sphParticleDebugs[i].isNearestNeighbour = false;
 		sphParticleDebugs[i].isNearestNeighbourTarget = false;
+		sphParticleDebugs[i].linearVelocity = glm::length2(sphParticles[i]->getVelocity());
 	}
 	for (int i = 0; i < boundaryParticleDebugs.size(); i++)
 	{

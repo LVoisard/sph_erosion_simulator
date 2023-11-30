@@ -65,7 +65,9 @@ Sphere* sphere;
 Sphere* boundaryParticleSphere;
 ParticleGenerator* sphParticles;
 
+ErosionModel erosionModel;
 SimulationParametersUI* simParams;
+
 
 std::default_random_engine gen;
 std::uniform_int_distribution<> distr;
@@ -116,11 +118,15 @@ void raycastThroughScene()
 
 void HandleHeightmapResets()
 {
-	if (simParams->regenerateHeightMapRequested || window.getKeyDown(GLFW_KEY_R)) {
-		simParams->regenerateHeightMapRequested = false;
-		map.changeSeed();
-		// resetModel();
-	}
+	//if (simParams->regenerateHeightMapRequested || window.getKeyDown(GLFW_KEY_R)) {
+	//	simParams->regenerateHeightMapRequested = false;
+	//	map.changeSeed();
+	//	terrainMesh->updateMeshFromMap(&map);
+	//	terrainMesh->updateOriginalHeights();
+	//	// resetModel();
+	//}
+
+	// DOESNT WORK FOR NOW
 
 	if (simParams->saveHeightMapRequested)
 	{
@@ -144,7 +150,6 @@ void HandleHeightmapResets()
 }
 void HandleKeyboardInputs()
 {
-
 }
 
 void HandleCamera(float deltaTime)
@@ -190,6 +195,7 @@ void UpdateShaders(glm::mat4& view, glm::mat4& proj, glm::mat4& model, float& de
 	waterShader.setUniformFloat("deltaTime", &deltaTime);
 	waterNormalTexture.use();
 	waterShader.setTexture("texture0", GL_TEXTURE0);
+	waterShader.setUniformInt("waterDebugMode", (int)erosionModel.waterDebugMode);
 
 	sphParticles->drawParticles();
 	waterShader.stop();
@@ -264,7 +270,7 @@ int main(int argc, char* argv[])
 	// this is cubed (3 = 27 in one cube)
 	int numInOneCell = 1;
 	float h = 0.2;
-	SPHSettings settings = SPHSettings(1, 880, 580, 0.25, 0.01, h, 0, 0.0045f);
+	SPHSettings settings = SPHSettings(1, 880, 580, 0.25, 0.01, h, -9.8f, 0.0045f);
 	sphParticles = new ParticleGenerator(defaultShader, sphere, boundaryParticleSphere, &map, terrainMesh, terrainSpacing, h, particleRadius, numInOneCell, &settings);
 
 	glm::mat4 proj = glm::mat4(1.0f);
@@ -308,7 +314,7 @@ int main(int argc, char* argv[])
 		// drawing
 		UpdateShaders(view, proj, model, deltaTime);
 
-		window.Menu(&settings, simParams);
+		window.Menu(&erosionModel , &settings, simParams);
 
 		ImGui::Render();
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());

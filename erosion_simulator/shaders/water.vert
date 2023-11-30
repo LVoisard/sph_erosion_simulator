@@ -6,12 +6,14 @@ layout (location = 2) in vec2 uv;
 layout (location = 3) in mat4 aInstanceMatrix;
 layout (location = 7) in int target;
 layout (location = 8) in int neighbour;
+layout (location = 9) in float linearVelocity;
 
 out vec3 fragNormal;
 out vec3 fragPos;
 out vec2 texCoord;
 flat out int fragIsTarget;
 flat out int fragIsNeighbour;
+out float fragLinearVelocity;
 
 uniform mat4 projection;
 uniform mat4 view;
@@ -28,4 +30,6 @@ void main()
 
 	fragIsTarget = target;
 	fragIsNeighbour = neighbour;
+
+	fragLinearVelocity = linearVelocity;
 }

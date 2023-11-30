@@ -48,7 +48,7 @@ public:
 	double getMouseScrollY() { return mouseScrollY; }
 	
 	
-	void Menu(SPHSettings*, SimulationParametersUI*);
+	void Menu(ErosionModel*, SPHSettings*, SimulationParametersUI*);
 	bool showSimulationParameters;
 	bool showPaintBrushMenu;
 	bool showSaveMenu;
