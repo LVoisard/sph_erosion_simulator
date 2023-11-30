@@ -1,6 +1,10 @@
 #include "sph_particle.h"
 
+
+int SphParticle::next_id = 0;
+
 SphParticle::SphParticle(glm::vec3 position, float radius) : Particle(position, radius) {
+	id = SphParticle::next_id++;
 }
 
 void SphParticle::update(float deltaTime, float time)

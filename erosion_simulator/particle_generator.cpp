@@ -11,7 +11,7 @@ ParticleGenerator::ParticleGenerator(Shader& shader, Mesh* sphMesh, Mesh* bounda
 	float mapWidth = _heightmap->getWidth();
 	float mapLength = _heightmap->getLength();
 	float maxHeight = _heightmap->getMaxHeight();
-	float height = _heightmap->getHeight();	
+	float height = _heightmap->getHeight();
 
 	std::cout << " height " << (mapWidth - 1) << std::endl;
 	float sphOffset = (cellSize / 1.9 / (numPerSquare));
@@ -24,7 +24,7 @@ ParticleGenerator::ParticleGenerator(Shader& shader, Mesh* sphMesh, Mesh* bounda
 				//((maxHeight - y) + (float) (y * cellSize / 2 / (numPerSquare)) - (cellSize / 2 / (numPerSquare)))
 				glm::vec3 pos(
 					(float)x * sphOffset - (float)(mapWidth - 1) / 8 + sphOffset,
-					(float)(((maxHeight - 1)/2 - y * sphOffset)) - sphOffset,
+					(float)(((maxHeight - 1) / 2 - y * sphOffset)) - sphOffset,
 					(float)z * sphOffset - (float)(mapLength - 1) / 8 + sphOffset);
 				SphParticle* sphPart = new SphParticle(pos * terrainSpacing, particleRadius);
 				sphParticles.push_back(sphPart);
@@ -51,7 +51,7 @@ ParticleGenerator::ParticleGenerator(Shader& shader, Mesh* sphMesh, Mesh* bounda
 	glGenBuffers(1, &sphBuffer);
 	glBindBuffer(GL_ARRAY_BUFFER, sphBuffer);
 	glBufferData(GL_ARRAY_BUFFER, particleModels.size() * sizeof(glm::mat4), particleModels.data(), GL_DYNAMIC_DRAW);
-		
+
 	// set attribute pointers for matrix (4 times vec4)
 	glEnableVertexAttribArray(3);
 	glEnableVertexAttribArray(4);
@@ -75,7 +75,7 @@ ParticleGenerator::ParticleGenerator(Shader& shader, Mesh* sphMesh, Mesh* bounda
 	glGenBuffers(1, &sphDebugBuffer);
 	glBindBuffer(GL_ARRAY_BUFFER, sphDebugBuffer);
 	glBufferData(GL_ARRAY_BUFFER, sphParticleDebugs.size() * sizeof(SPHParticleDebug), sphParticleDebugs.data(), GL_DYNAMIC_DRAW);
-	
+
 	glEnableVertexAttribArray(7);
 	glEnableVertexAttribArray(8);
 	glEnableVertexAttribArray(9);
@@ -118,7 +118,7 @@ ParticleGenerator::ParticleGenerator(Shader& shader, Mesh* sphMesh, Mesh* bounda
 	glGenBuffers(1, &terrainParticlesDebugBuffer);
 	glBindBuffer(GL_ARRAY_BUFFER, terrainParticlesDebugBuffer);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(BoundaryParticleDebug) * boundaryParticleDebugs.size(), boundaryParticleDebugs.data(), GL_DYNAMIC_DRAW);
-	
+
 	glEnableVertexAttribArray(7);
 
 	glVertexAttribPointer(7, 1, GL_INT, GL_FALSE, sizeof(int), (void*)0);
@@ -126,12 +126,12 @@ ParticleGenerator::ParticleGenerator(Shader& shader, Mesh* sphMesh, Mesh* bounda
 	glVertexAttribDivisor(7, 1);
 
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	
+
 	glBindVertexArray(0);
 
 	std::vector<SphParticle*> sphParticleVector(sphParticles.begin(), sphParticles.end()); // turn vector<SphParticle*> into vector<Particle*> (implicit casting isn't possible)
 	std::vector<TerrainParticle*> terrainParticleVector(terrainParticles.begin(), terrainParticles.end());
-	grid = Grid3D(mapWidth - 1, mapLength - 1, height, terrainSpacing,  cellSize, sphParticleVector, terrainParticleVector, shader);
+	grid = Grid3D(mapWidth - 1, mapLength - 1, height, terrainSpacing, cellSize, sphParticleVector, terrainParticleVector, shader);
 
 	//settings.restDensity = ((mapWidth - 1) * (mapLength - 1) * height) / (settings.mass * sphParticles.size()) * cellSize;
 
@@ -141,7 +141,7 @@ ParticleGenerator::ParticleGenerator(Shader& shader, Mesh* sphMesh, Mesh* bounda
 }
 
 void ParticleGenerator::drawParticles()
-{	
+{
 	particleMesh->drawInstanced(particleModels.size());
 }
 
@@ -160,12 +160,12 @@ static float timePast = 0;
 void ParticleGenerator::updateParticles(float deltaTime, float time)
 {
 	deltaTime = 0.0045;
-	std::unordered_map <SphParticle*,std::vector<SphParticle*>> particleNeigbours;
+	std::unordered_map <SphParticle*, std::vector<SphParticle*>> particleNeigbours;
 
 	for (int i = 0; i < sphParticles.size(); i++)
 	{
 		// before updating particle position
-		
+
 		// update particle
 		std::vector<SphParticle*> parts = grid.getNeighbouringSPHPaticlesInRadius(sphParticles[i]);
 		std::pair<SphParticle*, std::vector<SphParticle*>> pair(sphParticles[i], parts);
@@ -186,7 +186,7 @@ void ParticleGenerator::updateParticles(float deltaTime, float time)
 		Cell* previousCell = grid.getCellFromPosition(sphParticles[i]->getPosition());
 		glm::vec3 acceleration = glm::vec3(0, settings->g, 0);
 
-		sphParticles[i]->setVelocity(sphParticles[i]->getVelocity() + (acceleration) * deltaTime);
+		sphParticles[i]->setVelocity(sphParticles[i]->getVelocity() + (acceleration)*deltaTime);
 		sphParticles[i]->setPosition(sphParticles[i]->getPosition() + sphParticles[i]->getVelocity() * deltaTime);
 
 
@@ -194,7 +194,7 @@ void ParticleGenerator::updateParticles(float deltaTime, float time)
 		glm::vec3 vel = sphParticles[i]->getVelocity();
 		float rad = sphParticles[i]->getRadius();
 		// std::cout << pos.x << " " << pos.y << " " << pos.z << std::endl;
-		
+
 		if (pos.x - rad < _heightmap->getMinX() || pos.x + rad >= _heightmap->getMaxX() - 1) {
 			sphParticles[i]->setPosition(glm::vec3(pos.x - rad < _heightmap->getMinX() ? _heightmap->getMinX() + rad : _heightmap->getMaxX() - 1 - rad, pos.y, pos.z));
 			sphParticles[i]->setVelocity(glm::vec3(-vel.x * 0.05f, vel.y, vel.z));
@@ -256,7 +256,6 @@ void ParticleGenerator::updateParticles(float deltaTime, float time)
 	int particleID = iter % sphParticles.size();
 
 	// debug all particles in one minute (of fps allows it)
-	std::cout << glm::length(sphParticles[0]->getVelocity()) << std::endl;
 
 	for (int i = 0; i < sphParticleDebugs.size(); i++)
 	{
@@ -271,47 +270,132 @@ void ParticleGenerator::updateParticles(float deltaTime, float time)
 
 	Cell* cell = grid.getCellFromPosition(sphParticles[particleID]->getPosition());
 	std::vector<SphParticle*> parts = grid.getNeighbouringSPHPaticlesInRadius(sphParticles[particleID]);
-	std::cout << parts.size() << "neighbours" << std::endl;
+	// std::cout << parts.size() << "neighbours" << std::endl;
 
 	sphParticleDebugs[particleID].isNearestNeighbourTarget = true;
 	for (int i = 0; i < parts.size(); i++)
 	{
 		sphParticleDebugs[parts[i]->getId()].isNearestNeighbour = true;
 	}
-	if (timePast > (float)60 / sphParticles.size() ) {
+	if (timePast > (float)60 / sphParticles.size()) {
 		timePast = 0;
 		iter++;
 	}
 	timePast += deltaTime;
-	
-	/*printf("Nearest Neighbour node to (%f, %f, %f) (ID: %d) is (%f, %f, %f) (ID: %d)\n", 
+
+	/*printf("Nearest Neighbour node to (%f, %f, %f) (ID: %d) is (%f, %f, %f) (ID: %d)\n",
 		particles[0]->getPosition().x, particles[0]->getPosition().y, particles[0]->getPosition().z,
 		particles[0]->getId(),
 		node->particle->getPosition().x, node->particle->getPosition().y, node->particle->getPosition().z,
 		node->particle->getId());*/
 
-	// update the models buffer
+		// update the models buffer
 	glBindBuffer(GL_ARRAY_BUFFER, sphBuffer);
 	void* data = glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
 	memcpy(data, particleModels.data(), sizeof(particleModels[0]) * particleModels.size());
 	glUnmapBuffer(GL_ARRAY_BUFFER);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
 
 	// update the models buffer
 	glBindBuffer(GL_ARRAY_BUFFER, terrainParticlesBuffer);
 	void* terrainData = glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
 	memcpy(terrainData, particleModelsTerrain.data(), sizeof(particleModelsTerrain[0]) * particleModelsTerrain.size());
 	glUnmapBuffer(GL_ARRAY_BUFFER);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
 
 	// update the debug buffer
 	glBindBuffer(GL_ARRAY_BUFFER, sphDebugBuffer);
 	void* debugData = glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
 	memcpy(debugData, sphParticleDebugs.data(), sizeof(sphParticleDebugs[0]) * sphParticleDebugs.size());
 	glUnmapBuffer(GL_ARRAY_BUFFER);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
 
 	glBindBuffer(GL_ARRAY_BUFFER, terrainParticlesDebugBuffer);
 	void* boundaryDebugData = glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
 	memcpy(boundaryDebugData, boundaryParticleDebugs.data(), sizeof(boundaryParticleDebugs[0]) * boundaryParticleDebugs.size());
 	glUnmapBuffer(GL_ARRAY_BUFFER);
-	
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+
 	//particleMesh->update();
+}
+
+void ParticleGenerator::addParticles(glm::vec3 pos, float radius, float intensity)
+{
+	int rad = (int)radius;
+	int intens = (int)intensity;
+	std::vector<SphParticle*> parts;
+	for (int x = -rad * intensity; x < rad * intensity; x++)
+	{
+		for (int y = 0; y < rad * intensity; y++) {
+
+			for (int z = -rad * intensity; z < rad * intensity; z++)
+			{
+				glm::vec3 position(
+					(float)x / intensity,
+					(float)y /intensity + rad,
+					(float)z / intensity);
+				SphParticle* sphPart = new SphParticle(pos + position, 0.05);
+				parts.push_back(sphPart);
+				particleModels.push_back(glm::translate(glm::mat4(1), sphPart->getPosition()));
+				sphParticleDebugs.push_back(SPHParticleDebug());				
+			}
+		}
+	}
+
+	sphParticles.insert(sphParticles.end(), parts.begin(), parts.end());
+	glBindVertexArray(particleMesh->getVAO());
+
+	glGenBuffers(1, &sphBuffer);
+	glBindBuffer(GL_ARRAY_BUFFER, sphBuffer);
+	glBufferData(GL_ARRAY_BUFFER, particleModels.size() * sizeof(glm::mat4), particleModels.data(), GL_DYNAMIC_DRAW);
+
+	// set attribute pointers for matrix (4 times vec4)
+	glEnableVertexAttribArray(3);
+	glEnableVertexAttribArray(4);
+	glEnableVertexAttribArray(5);
+	glEnableVertexAttribArray(6);
+
+	glVertexAttribPointer(3, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (void*)0);
+	glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (void*)(1 * sizeof(glm::vec4)));
+	glVertexAttribPointer(5, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (void*)(2 * sizeof(glm::vec4)));
+	glVertexAttribPointer(6, 4, GL_FLOAT, GL_FALSE, sizeof(glm::mat4), (void*)(3 * sizeof(glm::vec4)));
+
+	glVertexAttribDivisor(3, 1);
+	glVertexAttribDivisor(4, 1);
+	glVertexAttribDivisor(5, 1);
+	glVertexAttribDivisor(6, 1);
+
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+	// debug information 
+
+	glGenBuffers(1, &sphDebugBuffer);
+	glBindBuffer(GL_ARRAY_BUFFER, sphDebugBuffer);
+	glBufferData(GL_ARRAY_BUFFER, sphParticleDebugs.size() * sizeof(SPHParticleDebug), sphParticleDebugs.data(), GL_DYNAMIC_DRAW);
+
+	glEnableVertexAttribArray(7);
+	glEnableVertexAttribArray(8);
+	glEnableVertexAttribArray(9);
+	glVertexAttribPointer(7, 1, GL_INT, GL_FALSE, sizeof(SPHParticleDebug), (void*)0);
+	glVertexAttribPointer(8, 1, GL_INT, GL_FALSE, sizeof(SPHParticleDebug), (void*)(sizeof(int)));
+	glVertexAttribPointer(9, 1, GL_FLOAT, GL_FALSE, sizeof(SPHParticleDebug), (void*)(sizeof(int) * 2));
+	glVertexAttribDivisor(7, 1);
+	glVertexAttribDivisor(8, 1);
+	glVertexAttribDivisor(9, 1);
+
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+	glBindVertexArray(0);
+
+	glBindVertexArray(0);
+
+	std::cout << parts.size() << std::endl;
+
+	for (int i = 0; i < parts.size(); i++)
+	{
+		Cell* cell = grid.getCellFromPosition(parts[i]->getPosition());
+		if (cell != nullptr)
+			cell->addSphParticle(parts[i]);
+	}
+
 }

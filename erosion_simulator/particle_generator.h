@@ -36,7 +36,7 @@ public:
 	void drawTerrainParticles();
 	void drawGridDebug();
 	void updateParticles(float deltaTime, float time);
-	void addParticles();
+	void addParticles(glm::vec3 pos, float radius, float intensity);
 
 private:
 

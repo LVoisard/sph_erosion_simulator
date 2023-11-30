@@ -47,8 +47,8 @@ struct ErosionModel
 	bool isRaining = false;
 
 	bool castRays = false;
-	float brushRadius = 5.0f;
-	float brushIntensity = 25.0f;
+	float brushRadius = 1.5f;
+	float brushIntensity = 1.0f;
 	PaintMode paintMode = PaintMode::WATER_ADD;
 	WaterDebugMode waterDebugMode = WaterDebugMode::WATER_NORMAL;
 	TerrainDebugMode terrainDebugMode = TerrainDebugMode::TERRAIN_NORMAL;	

@@ -17,4 +17,5 @@ public:
 private:
 	glm::vec3 velocity = glm::vec3(0);
 	float density = 1;
+	static int next_id; // Ids are assigned on creation, with no overlap. This keeps track of the id that will be assigned to the next created particle.
 };

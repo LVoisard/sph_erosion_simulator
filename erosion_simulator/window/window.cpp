@@ -232,6 +232,7 @@ void Window::ShowSimulationParameters(ErosionModel* model, SPHSettings* settings
     if (ImGui::Begin("Simulation Parameters", open))
     {
         ImGui::Checkbox("Simulation Running", &model->isSimRunning);
+        ImGui::Checkbox("Cast Rays", &model->castRays);
 
         ImGui::Spacing();
         ImGui::Text("Particle Parameters");

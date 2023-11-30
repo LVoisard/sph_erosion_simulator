@@ -150,10 +150,10 @@ void HandleHeightmapResets()
 }
 void HandleKeyboardInputs()
 {
-	if (erosionModel.isSimRunning && window.getMouseButtonDown(GLFW_MOUSE_BUTTON_LEFT)) {
-		if (erosionModel.paintMode == PaintMode::WATER_ADD)
+	if (erosionModel.castRays && erosionModel.isSimRunning && window.getMouseButton(GLFW_MOUSE_BUTTON_LEFT)) {
+		if (erosionModel.paintMode == PaintMode::WATER_ADD && cursorOverPosition != glm::vec3(INT_MIN))
 		{
-
+			sphParticles->addParticles(cursorOverPosition, erosionModel.brushRadius, erosionModel.brushIntensity);
 		}
 	}
 }
@@ -315,7 +315,8 @@ int main(int argc, char* argv[])
 		glm::mat4 model = glm::mat4(1.0f);
 		glm::mat4 view = camera.getViewMatrix();
 
-		sphParticles->updateParticles(deltaTime, timePast);
+		if (erosionModel.isSimRunning)
+			sphParticles->updateParticles(deltaTime, timePast);
 
 		// drawing
 		UpdateShaders(view, proj, model, deltaTime);
