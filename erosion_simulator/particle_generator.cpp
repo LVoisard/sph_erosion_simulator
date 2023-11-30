@@ -4,8 +4,8 @@
 #include <exception>
 #include <unordered_map>
 
-ParticleGenerator::ParticleGenerator(Shader& shader, Mesh* sphMesh, Mesh* boundaryMesh, HeightMap* map, float terrainSpacing, float cellSize, float particleRadius, int numPerSquare)
-	:shader(shader), particleMesh(sphMesh), terrainParticlesMesh(boundaryMesh), _heightmap(map)
+ParticleGenerator::ParticleGenerator(Shader& shader, Mesh* sphMesh, Mesh* boundaryMesh, HeightMap* map, TerrainMesh* terrain, float terrainSpacing, float cellSize, float particleRadius, int numPerSquare, SPHSettings* settings)
+	:shader(shader), particleMesh(sphMesh), terrainParticlesMesh(boundaryMesh), _heightmap(map), terrain(terrain), settings(settings)
 {
 	float mapWidth = _heightmap->getWidth();
 	float mapLength = _heightmap->getLength();
@@ -13,7 +13,7 @@ ParticleGenerator::ParticleGenerator(Shader& shader, Mesh* sphMesh, Mesh* bounda
 	float height = _heightmap->getHeight();	
 
 	std::cout << " height " << (mapWidth - 1) << std::endl;
-	float sphOffset = (cellSize / 2 / (numPerSquare) / 8);
+	float sphOffset = (cellSize / 1.9 / (numPerSquare));
 	for (int x = 0; x < (mapWidth - 1) / cellSize * numPerSquare / 4; x++)
 	{
 		for (int y = 0; y < 8 * (numPerSquare); y++)
@@ -22,9 +22,9 @@ ParticleGenerator::ParticleGenerator(Shader& shader, Mesh* sphMesh, Mesh* bounda
 			{
 				//((maxHeight - y) + (float) (y * cellSize / 2 / (numPerSquare)) - (cellSize / 2 / (numPerSquare)))
 				glm::vec3 pos(
-					(float)x * cellSize / (numPerSquare) - (float)(mapWidth - 1) / 8 + sphOffset,
-					(float)(((maxHeight - 1)/2 - y * cellSize / numPerSquare)) - sphOffset,
-					(float)z * cellSize / (numPerSquare) - (float)(mapLength - 1) / 8 + sphOffset);
+					(float)x * sphOffset - (float)(mapWidth - 1) / 8 + sphOffset,
+					(float)(((maxHeight - 1)/2 - y * sphOffset)) - sphOffset,
+					(float)z * sphOffset - (float)(mapLength - 1) / 8 + sphOffset);
 				SphParticle* sphPart = new SphParticle(pos * terrainSpacing, particleRadius);
 				sphParticles.push_back(sphPart);
 				particleModels.push_back(glm::translate(glm::mat4(1), sphPart->getPosition()));
@@ -166,21 +166,21 @@ void ParticleGenerator::updateParticles(float deltaTime, float time)
 		std::vector<SphParticle*> parts = grid.getNeighbouringSPHPaticlesInRadius(sphParticles[i]);
 		std::pair<SphParticle*, std::vector<SphParticle*>> pair(sphParticles[i], parts);
 		particleNeigbours.insert(pair);
-		calculateDensity(sphParticles[i], particleNeigbours.at(sphParticles[i]), settings);
+		calculateDensity(sphParticles[i], particleNeigbours.at(sphParticles[i]), *settings);
 	}
 	for (int i = 0; i < sphParticles.size(); i++)
 	{
 		// before updating particle position
-		calculatePressureForce(sphParticles[i], particleNeigbours.at(sphParticles[i]), settings);
+		calculatePressureForce(sphParticles[i], particleNeigbours.at(sphParticles[i]), *settings);
 
-		// before updating particle position
-		calculateViscosity(sphParticles[i], particleNeigbours.at(sphParticles[i]), settings);
+		calculateSufaceTension(sphParticles[i], particleNeigbours.at(sphParticles[i]), *settings);
+		calculateViscosity(sphParticles[i], particleNeigbours.at(sphParticles[i]), *settings);
 	}
 
 	for (int i = 0; i < sphParticles.size(); i++)
 	{
 		Cell* previousCell = grid.getCellFromPosition(sphParticles[i]->getPosition());
-		glm::vec3 acceleration = glm::vec3(0, settings.g, 0);
+		glm::vec3 acceleration = glm::vec3(0, settings->g, 0);
 
 		sphParticles[i]->setVelocity(sphParticles[i]->getVelocity() + (acceleration) * deltaTime);
 		sphParticles[i]->setPosition(sphParticles[i]->getPosition() + sphParticles[i]->getVelocity() * deltaTime);
@@ -266,14 +266,7 @@ void ParticleGenerator::updateParticles(float deltaTime, float time)
 	Cell* cell = grid.getCellFromPosition(sphParticles[particleID]->getPosition());
 	std::vector<SphParticle*> parts = grid.getNeighbouringSPHPaticlesInRadius(sphParticles[particleID]);
 	std::cout << parts.size() << "neighbours" << std::endl;
-	//if (sphParticles[particleID]->getDensity() > settings.restDensity)
-	//std::cout << sphParticles[particleID]->getDensity() << " density" << std::endl;
-	//std::cout << sphParticles[particleID]->getNearDensity() << " near density" << std::endl;
-	//std::cout << sphParticles[particleID]->getPressure() << " pressure" << std::endl;
-	//std::cout << sphParticles[particleID]->getForce().x << " " << sphParticles[particleID]->getForce().y << " " << sphParticles[particleID]->getForce().z << " force" << std::endl;
-	//std::cout << sphParticles[particleID]->getVelocity().x << " " << sphParticles[particleID]->getVelocity().y << " " << sphParticles[particleID]->getVelocity().z << " velocity" << std::endl;
-	if (sphParticles[particleID]->getViscosity().x != 0 && sphParticles[particleID]->getViscosity().y != 0 && sphParticles[particleID]->getViscosity().z != 0)
-		std::cout << sphParticles[particleID]->getViscosity().x << " " << sphParticles[particleID]->getViscosity().y << " " << sphParticles[particleID]->getViscosity().z << " viscosity" << std::endl;
+
 	sphParticleDebugs[particleID].isNearestNeighbourTarget = true;
 	for (int i = 0; i < parts.size(); i++)
 	{

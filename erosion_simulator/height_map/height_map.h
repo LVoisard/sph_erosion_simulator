@@ -33,6 +33,7 @@ public:
 	int getHeight() const { return maxHeight - minHeight; }
 	bool pointInBounds(float x, float z) const;
 	glm::vec3 sampleNormalAtPosition(float x, float y) const;
+	glm::vec2 getOffset() const { return offset; }
 
 	float** heightMap;
 

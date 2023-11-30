@@ -260,11 +260,12 @@ int main(int argc, char* argv[])
 	boundaryParticleSphere->init();
 
 	float terrainSpacing = 1;
-	float cellSize = 0.2;
 
 	// this is cubed (3 = 27 in one cube)
 	int numInOneCell = 1;
-	sphParticles = new ParticleGenerator(defaultShader, sphere, boundaryParticleSphere, &map, terrainSpacing, cellSize, particleRadius, numInOneCell);
+	float h = 0.2;
+	SPHSettings settings = SPHSettings(1, 880, 580, 0.25, 0.01, h, 0, 0.0045f);
+	sphParticles = new ParticleGenerator(defaultShader, sphere, boundaryParticleSphere, &map, terrainMesh, terrainSpacing, h, particleRadius, numInOneCell, &settings);
 
 	glm::mat4 proj = glm::mat4(1.0f);
 	proj = glm::perspective(glm::radians(fov), window.getAspectRatio(), 0.1f, 1000.0f);
@@ -307,7 +308,7 @@ int main(int argc, char* argv[])
 		// drawing
 		UpdateShaders(view, proj, model, deltaTime);
 
-		window.Menu(&(sphParticles->settings), simParams);
+		window.Menu(&settings, simParams);
 
 		ImGui::Render();
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());

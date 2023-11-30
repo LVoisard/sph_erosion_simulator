@@ -11,7 +11,7 @@ struct SPHSettings
         float h, float g, float timeStep);
 
     glm::mat4 sphereScale;
-    float pressureMultiplier, nearPressureMultiplier, mass, h2,
+    float pressureMultiplier, surfaceTensionMultiplier, mass, h2,
           restDensity, viscosity, h, g, timeStep;
 };
 
@@ -21,5 +21,6 @@ void calculatePressureForce(SphParticle* particle, std::vector<SphParticle*> nei
 
 void calculateViscosity(SphParticle* particle, std::vector<SphParticle*> neighbours, const SPHSettings& settings);
 
+void calculateSufaceTension(SphParticle* particle, std::vector<SphParticle*> neighbours, const SPHSettings& settings);
 
 #endif //SPH_SPH_H

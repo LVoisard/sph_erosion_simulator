@@ -168,6 +168,8 @@ std::vector<SphParticle*> Grid3D::getNeighbouringSPHPaticlesInRadius(Particle* p
 
 	float searchRadius2 = particleSearchRadius * particleSearchRadius;
 
+	// parts.insert(parts.end(), current->sphParticles.begin(), current->sphParticles.end());
+
 	for (int i = 0; i < current->sphParticles.size(); i++)
 	{
 		if (current->sphParticles[i]->getId() != particle->getId() &&
@@ -177,11 +179,12 @@ std::vector<SphParticle*> Grid3D::getNeighbouringSPHPaticlesInRadius(Particle* p
 
 	for (int i = 0; i < cells.size(); i++)
 	{
-		for (int j = 0; j < cells[i]->sphParticles.size(); j++)
-		{
-			if(glm::distance2(particle->getPosition(), cells[i]->sphParticles[j]->getPosition()) <= searchRadius2)
-				parts.push_back(cells[i]->sphParticles[j]);
-		}
+		parts.insert(parts.end(), cells[i]->sphParticles.begin(), cells[i]->sphParticles.end());
+		//for (int j = 0; j < cells[i]->sphParticles.size(); j++)
+		//{
+		//	/*if(glm::distance2(particle->getPosition(), cells[i]->sphParticles[j]->getPosition()) <= searchRadius2)
+		//		parts.push_back(cells[i]->sphParticles[j]);*/
+		//}
 	}
 	return parts;
 }
