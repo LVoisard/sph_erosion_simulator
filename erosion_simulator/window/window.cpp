@@ -203,6 +203,10 @@ void Window::Menu(ErosionModel* model, SPHSettings* settings, SimulationParamete
                 {
                     model->waterDebugMode = WaterDebugMode::WATER_NORMAL;
                 }
+                if (ImGui::MenuItem("Stylized", NULL))
+                {
+                    model->waterDebugMode = WaterDebugMode::WATER_STYLIZED;
+                }
                 if (ImGui::MenuItem("Velocity", NULL))
                 {
                     model->waterDebugMode = WaterDebugMode::WATER_VELOCITY;
@@ -233,6 +237,9 @@ void Window::ShowSimulationParameters(ErosionModel* model, SPHSettings* settings
     {
         ImGui::Checkbox("Simulation Running", &model->isSimRunning);
         ImGui::Checkbox("Cast Rays", &model->castRays);
+        ImGui::Checkbox("Debug Grid", &model->debugGrid);
+        ImGui::Checkbox("Debug Neighbours", &model->debugNeighbours);
+        ImGui::Checkbox("Debug Terrain Particles", &model->debugTerrainParticles);
 
         ImGui::Spacing();
         ImGui::Text("Particle Parameters");

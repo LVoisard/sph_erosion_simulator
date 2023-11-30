@@ -14,6 +14,7 @@ enum class TerrainDebugMode
 enum class WaterDebugMode
 {
 	WATER_NORMAL,
+	WATER_STYLIZED,
 	WATER_VELOCITY,
 	WATER_SEDIMENT_TRANSPORT,
 	WATER_INVISIBLE,
@@ -41,13 +42,17 @@ struct ErosionModel
 {
 	bool isSimRunning = false;
 
+	bool debugNeighbours = false;
+	bool debugTerrainParticles = false;
+	bool debugGrid = false;
+
 	int rainIntensity = 1;
 	int rainAmount = 1;
 
 	bool isRaining = false;
 
 	bool castRays = false;
-	float brushRadius = 1.5f;
+	float brushRadius = 1.0f;
 	float brushIntensity = 1.0f;
 	PaintMode paintMode = PaintMode::WATER_ADD;
 	WaterDebugMode waterDebugMode = WaterDebugMode::WATER_NORMAL;

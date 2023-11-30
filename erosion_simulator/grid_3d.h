@@ -35,11 +35,11 @@ public:
 	std::vector<Cell*> getCellNeighbours(Cell* cell);
 	std::vector<SphParticle*> getNeighbouringSPHPaticlesInRadius(Particle* particle);
 	Cell**** cells;
+	float cellSize;
 private:
 	Shader shader;
 	float particleSearchRadius;
 	int width, length, height;
-	float cellSize;
 	Mesh* debugMesh;
 };
 

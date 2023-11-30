@@ -17,7 +17,7 @@ ParticleGenerator::ParticleGenerator(Shader& shader, Mesh* sphMesh, Mesh* bounda
 	float sphOffset = (cellSize / 1.9 / (numPerSquare));
 	for (int x = 0; x < (mapWidth - 1) / cellSize * numPerSquare / 4; x++)
 	{
-		for (int y = 0; y < 4 * (numPerSquare); y++)
+		for (int y = 0; y < 6 * (numPerSquare); y++)
 		{
 			for (int z = 0; z < (mapLength - 1) / cellSize * numPerSquare / 4; z++)
 			{
@@ -155,8 +155,6 @@ void ParticleGenerator::drawGridDebug()
 	grid.draw();
 }
 
-static int iter = 0;
-static float timePast = 0;
 void ParticleGenerator::updateParticles(float deltaTime, float time)
 {
 	deltaTime = 0.0045;
@@ -246,43 +244,13 @@ void ParticleGenerator::updateParticles(float deltaTime, float time)
 		}
 	}
 
-	int mapWidth = _heightmap->getWidth();
-	int mapHeight = _heightmap->getLength();
-	int mapLength = _heightmap->getHeight();
-
-	int x = iter % mapWidth;
-	int z = (iter / mapWidth) % mapLength;
-	int y = ((iter / mapWidth) / mapLength) % mapHeight;
-	int particleID = iter % sphParticles.size();
-
-	// debug all particles in one minute (of fps allows it)
-
 	for (int i = 0; i < sphParticleDebugs.size(); i++)
-	{
+	{		
 		sphParticleDebugs[i].isNearestNeighbour = false;
 		sphParticleDebugs[i].isNearestNeighbourTarget = false;
 		sphParticleDebugs[i].linearVelocity = glm::length2(sphParticles[i]->getVelocity());
 	}
-	for (int i = 0; i < boundaryParticleDebugs.size(); i++)
-	{
-		boundaryParticleDebugs[i].isNearestNeighbour = false;
-	}
-
-	Cell* cell = grid.getCellFromPosition(sphParticles[particleID]->getPosition());
-	std::vector<SphParticle*> parts = grid.getNeighbouringSPHPaticlesInRadius(sphParticles[particleID]);
-	// std::cout << parts.size() << "neighbours" << std::endl;
-
-	sphParticleDebugs[particleID].isNearestNeighbourTarget = true;
-	for (int i = 0; i < parts.size(); i++)
-	{
-		sphParticleDebugs[parts[i]->getId()].isNearestNeighbour = true;
-	}
-	if (timePast > (float)60 / sphParticles.size()) {
-		timePast = 0;
-		iter++;
-	}
-	timePast += deltaTime;
-
+	
 	/*printf("Nearest Neighbour node to (%f, %f, %f) (ID: %d) is (%f, %f, %f) (ID: %d)\n",
 		particles[0]->getPosition().x, particles[0]->getPosition().y, particles[0]->getPosition().z,
 		particles[0]->getId(),
@@ -331,9 +299,9 @@ void ParticleGenerator::addParticles(glm::vec3 pos, float radius, float intensit
 			for (int z = -rad * intensity; z < rad * intensity; z++)
 			{
 				glm::vec3 position(
-					(float)x / intensity,
-					(float)y /intensity + rad,
-					(float)z / intensity);
+					(float)x * grid.cellSize,
+					(float)y * grid.cellSize + rad,
+					(float)z * grid.cellSize);
 				SphParticle* sphPart = new SphParticle(pos + position, 0.05);
 				parts.push_back(sphPart);
 				particleModels.push_back(glm::translate(glm::mat4(1), sphPart->getPosition()));
@@ -398,4 +366,50 @@ void ParticleGenerator::addParticles(glm::vec3 pos, float radius, float intensit
 			cell->addSphParticle(parts[i]);
 	}
 
+}
+
+static int iter = 0;
+static float timePast = 0;
+void ParticleGenerator::debugNeighbours(float deltaTime, float time)
+{
+	int mapWidth = _heightmap->getWidth();
+	int mapHeight = _heightmap->getLength();
+	int mapLength = _heightmap->getHeight();
+
+	int x = iter % mapWidth;
+	int z = (iter / mapWidth) % mapLength;
+	int y = ((iter / mapWidth) / mapLength) % mapHeight;
+	int particleID = iter % sphParticles.size();
+
+	// debug all particles in one minute (of fps allows it)
+	for (int i = 0; i < boundaryParticleDebugs.size(); i++)
+	{
+		boundaryParticleDebugs[i].isNearestNeighbour = false;
+	}
+	for (int i = 0; i < sphParticleDebugs.size(); i++)
+	{
+		sphParticleDebugs[i].isNearestNeighbour = false;
+		sphParticleDebugs[i].isNearestNeighbourTarget = false;
+	}
+
+	Cell* cell = grid.getCellFromPosition(sphParticles[particleID]->getPosition());
+	std::vector<SphParticle*> parts = grid.getNeighbouringSPHPaticlesInRadius(sphParticles[particleID]);
+	// std::cout << parts.size() << "neighbours" << std::endl;
+
+	sphParticleDebugs[particleID].isNearestNeighbourTarget = true;
+	for (int i = 0; i < parts.size(); i++)
+	{
+		sphParticleDebugs[parts[i]->getId()].isNearestNeighbour = true;
+	}
+	if (timePast > (float)60 / sphParticles.size()) {
+		timePast = 0;
+		iter++;
+	}
+	timePast += deltaTime;
+
+	glBindBuffer(GL_ARRAY_BUFFER, sphDebugBuffer);
+	void* debugData = glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
+	memcpy(debugData, sphParticleDebugs.data(), sizeof(sphParticleDebugs[0]) * sphParticleDebugs.size());
+	glUnmapBuffer(GL_ARRAY_BUFFER);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
 }

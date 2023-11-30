@@ -37,6 +37,7 @@ public:
 	void drawGridDebug();
 	void updateParticles(float deltaTime, float time);
 	void addParticles(glm::vec3 pos, float radius, float intensity);
+	void debugNeighbours(float deltaTime, float time);
 
 private:
 

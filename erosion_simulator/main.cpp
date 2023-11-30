@@ -206,7 +206,7 @@ void UpdateShaders(glm::mat4& view, glm::mat4& proj, glm::mat4& model, float& de
 	sphParticles->drawParticles();
 	waterShader.stop();
 
-	if (false) {
+	if (erosionModel.debugGrid) {
 		defaultShader.use();
 		defaultShader.setMat4("view", view);
 		defaultShader.setMat4("projection", proj);
@@ -216,7 +216,7 @@ void UpdateShaders(glm::mat4& view, glm::mat4& proj, glm::mat4& model, float& de
 		defaultShader.stop();
 	}
 
-	if (true) {
+	if (erosionModel.debugTerrainParticles) {
 		boundaryParticleShader.use();
 		boundaryParticleShader.setMat4("view", view);
 		boundaryParticleShader.setMat4("projection", proj);
@@ -315,8 +315,12 @@ int main(int argc, char* argv[])
 		glm::mat4 model = glm::mat4(1.0f);
 		glm::mat4 view = camera.getViewMatrix();
 
+
 		if (erosionModel.isSimRunning)
 			sphParticles->updateParticles(deltaTime, timePast);
+
+		if (erosionModel.debugNeighbours)
+			sphParticles->debugNeighbours(deltaTime, timePast);
 
 		// drawing
 		UpdateShaders(view, proj, model, deltaTime);

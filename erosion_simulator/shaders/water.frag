@@ -24,7 +24,7 @@ uniform float deltaTime;
 uniform int waterDebugMode;
 
 
-float maxSpeed = 100;
+float maxSpeed = 64;
 
 
 vec3 lightDirection = normalize(vec3(1.0,10.0, 3.0));
@@ -69,7 +69,12 @@ float getBlue(float velocity)
 void main()
 {
 	// water velocity
+	vec3 baseColor = vec3(15.0 / 256, 94.0 / 256, 156.0 / 256.0);
 	if(waterDebugMode == 1) {
+		float a = smoothstep(0.0, maxSpeed, fragLinearVelocity);
+		baseColor = mix( vec3(15.0 / 256, 94.0 / 256, 156.0 / 256.0), vec3(189.0 /256.0 , 196.0 / 256.0, 197.0 / 256.0), a);
+	}
+	else if(waterDebugMode == 2) {
 		vec3 c;
 		if (maxSpeed / 3 >= fragLinearVelocity) {
 			float a = smoothstep(0.0, maxSpeed / 3, fragLinearVelocity);
@@ -81,17 +86,16 @@ void main()
 			float a = smoothstep(0.0, maxSpeed / 3, fragLinearVelocity - 2 * maxSpeed / 3);
 			c = mix(vec3(0.5,0.5,0), vec3(0.8,0.1,0), a);
 		}
-		fragColor = vec4(c, 1);
-		return;
+		baseColor = c;
 	}
 	// sediment transportation
-	else if (waterDebugMode == 2)
+	else if (waterDebugMode == 3)
 	{
 		fragColor = vec4(1,0,1,1);
 		return;
 	}
 	// invisible
-	else if( waterDebugMode == 3)
+	else if( waterDebugMode == 4)
 	{
 		fragColor = vec4(0);
 		return;
@@ -109,7 +113,6 @@ void main()
 		return;
 	}
 
-	vec3 baseColor = vec3(15.0 / 256, 94.0 / 256, 156.0 / 256.0);
 
 	vec3 normalMap = texture(texture0, texCoord).rbg * 2.0 - 1.0;
 	vec3 normal = normalize(fragNormal + normalMap);
@@ -123,6 +126,7 @@ void main()
 	vec4 specularColor = vec4(0.5 * vec3(specularFactor), 1.0);
 	
 
+	
 	vec4 base = vec4(baseColor, 1.0);
 
 	fragColor = clamp(base *(diffuseColor + specularColor), 0, 1);
