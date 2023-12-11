@@ -34,6 +34,7 @@ public:
 	bool pointInBounds(float x, float z) const;
 	glm::vec3 sampleNormalAtPosition(float x, float y) const;
 	glm::vec2 getOffset() const { return offset; }
+	void modify_height(float x, float y, float amount);
 
 	float** heightMap;
 

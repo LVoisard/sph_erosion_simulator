@@ -37,7 +37,7 @@ ParticleGenerator::ParticleGenerator(Shader& shader, Mesh* sphMesh, Mesh* bounda
 	for (int x = 0; x < mapWidth; x++) {
 		for (int y = 0; y < mapLength; y++) {
 			glm::vec3 position = map->getPositionAtIndex(x, y);
-			TerrainParticle* terrainPart = new TerrainParticle(position, particleRadius, x, y);
+			TerrainParticle* terrainPart = new TerrainParticle(position, particleRadius, x, 0);
 			terrainParticles.push_back(terrainPart);
 			boundaryParticleDebugs.push_back(BoundaryParticleDebug());
 
@@ -157,6 +157,8 @@ void ParticleGenerator::drawGridDebug()
 
 void ParticleGenerator::updateParticles(float deltaTime, float time)
 {
+
+
 	deltaTime = 0.0045;
 	std::unordered_map <SphParticle*, std::vector<SphParticle*>> particleNeigbours;
 
@@ -181,6 +183,7 @@ void ParticleGenerator::updateParticles(float deltaTime, float time)
 
 	for (int i = 0; i < sphParticles.size(); i++)
 	{
+		SphParticle* sphParticle = sphParticles[i];
 		Cell* previousCell = grid.getCellFromPosition(sphParticles[i]->getPosition());
 		glm::vec3 acceleration = glm::vec3(0, settings->g, 0);
 
@@ -188,60 +191,63 @@ void ParticleGenerator::updateParticles(float deltaTime, float time)
 		sphParticles[i]->setPosition(sphParticles[i]->getPosition() + sphParticles[i]->getVelocity() * deltaTime);
 
 
-		glm::vec3 pos = sphParticles[i]->getPosition();
-		glm::vec3 vel = sphParticles[i]->getVelocity();
-		float rad = sphParticles[i]->getRadius();
-		// std::cout << pos.x << " " << pos.y << " " << pos.z << std::endl;
+		glm::vec3 pos = sphParticle->getPosition();
+		glm::vec3 vel = sphParticle->getVelocity();
+		float rad = sphParticle->getRadius();
 
 		if (pos.x - rad < _heightmap->getMinX() || pos.x + rad >= _heightmap->getMaxX() - 1) {
-			sphParticles[i]->setPosition(glm::vec3(pos.x - rad < _heightmap->getMinX() ? _heightmap->getMinX() + rad : _heightmap->getMaxX() - 1 - rad, pos.y, pos.z));
-			sphParticles[i]->setVelocity(glm::vec3(-vel.x * 0.05f, vel.y, vel.z));
-			//std::cout << "outside X bounds" << std::endl;
+			sphParticle->setPosition(glm::vec3(pos.x - rad < _heightmap->getMinX() ? _heightmap->getMinX() + rad : _heightmap->getMaxX() - 1 - rad, pos.y, pos.z));
+			sphParticle->setVelocity(glm::vec3(-vel.x * 0.05f, vel.y, vel.z));
 		}
 
-		pos = sphParticles[i]->getPosition();
-		vel = sphParticles[i]->getVelocity();
+		pos = sphParticle->getPosition();
+		vel = sphParticle->getVelocity();
 		if (pos.z - rad < _heightmap->getMinZ() || pos.z + rad >= _heightmap->getMaxZ() - 1) {
-			//std::cout << "outside Z bounds" << std::endl;
-			sphParticles[i]->setPosition(glm::vec3(pos.x, pos.y, pos.z - rad < _heightmap->getMinZ() ? _heightmap->getMinZ() + rad : _heightmap->getMaxZ() - 1 - rad));
-			sphParticles[i]->setVelocity(glm::vec3(vel.x, vel.y, -vel.z * 0.05f));
+			sphParticle->setPosition(glm::vec3(pos.x, pos.y, pos.z - rad < _heightmap->getMinZ() ? _heightmap->getMinZ() + rad : _heightmap->getMaxZ() - 1 - rad));
+			sphParticle->setVelocity(glm::vec3(vel.x, vel.y, -vel.z * 0.05f));
 		}
 
 
-		pos = sphParticles[i]->getPosition();
-		vel = sphParticles[i]->getVelocity();
+		pos = sphParticle->getPosition();
+		vel = sphParticle->getVelocity();
 		// if the particle is below the terrain, bring it back.
 		// UNCOMMENT BELOW
-		float terrainHeightAtPosition = _heightmap->sampleHeightAtPosition(pos.x, pos.z);
-		if (sphParticles[i]->getPosition().y - rad <= terrainHeightAtPosition) {
+		float terrainHeightAtPosition = terrain->sampleHeightAtPosition(pos.x, pos.z);
+		if (pos.y - rad <= terrainHeightAtPosition) {
+			float takeAmount = sphParticle->getSedimentTake();
+			terrain->modify_height(pos.x, pos.z, -takeAmount);
+			sphParticle->takeSediment(takeAmount);
 
-			glm::vec3 normal = _heightmap->sampleNormalAtPosition(pos.x, pos.z);
-			float yStrength = std::clamp(1 - glm::dot(normal, glm::normalize(sphParticles[i]->getVelocity())), 0.05f, 0.95f);
+			glm::vec3 normal = terrain->sampleNormalAtPosition(pos.x, pos.z);
+			float yStrength = std::clamp(1 - glm::dot(normal, glm::normalize(sphParticle->getVelocity())), 0.05f, 0.95f);
 			sphParticles[i]->setPosition(glm::vec3(pos.x, terrainHeightAtPosition + rad, pos.z));
-			glm::vec3 newVel = glm::reflect(sphParticles[i]->getVelocity(), normal);
-			sphParticles[i]->setVelocity(glm::vec3(newVel.x * 0.95f, newVel.y * yStrength, newVel.z * 0.95f));
-			// sphParticles[i]->setVelocity(glm::vec3(vel.x, -vel.y * 0.2, vel.z));
-			// should perform some operation on the velocity and pressure here as well.
+			glm::vec3 newVel = glm::reflect(sphParticle->getVelocity(), normal);
+			sphParticle->setVelocity(glm::vec3(newVel.x * 0.95f, newVel.y * yStrength, newVel.z * 0.95f));
+			// sphParticle->setVelocity(glm::vec3(vel.x, -vel.y * 0.2, vel.z));
 		}
-		else if (sphParticles[i]->getPosition().y + rad > _heightmap->getMaxHeight() - 1)
+		else if (sphParticle->getPosition().y + rad > _heightmap->getMaxHeight() - 1)
 		{
-			sphParticles[i]->setPosition(glm::vec3(pos.x, _heightmap->getMaxHeight() - 1 - rad - 0.001, pos.z));
-			sphParticles[i]->setVelocity(glm::vec3(vel.x * 0.5f, -vel.y * 0.05, vel.z * 0.5));
+			sphParticle->setPosition(glm::vec3(pos.x, _heightmap->getMaxHeight() - 1 - rad - 0.001, pos.z));
+			sphParticle->setVelocity(glm::vec3(vel.x * 0.5f, -vel.y * 0.05, vel.z * 0.5));
 		}
 
 		// Update position
-		particleModels[i] = glm::translate(glm::mat4(1.0), sphParticles[i]->getPosition());
+		particleModels[i] = glm::translate(glm::mat4(1.0), sphParticle->getPosition());
 		// search for neighbours
 
 		//after updating particle position
-		Cell* currentCell = grid.getCellFromPosition(sphParticles[i]->getPosition());
+		Cell* currentCell = grid.getCellFromPosition(sphParticle->getPosition());
 		if (previousCell != currentCell)
 		{
 			if (previousCell != nullptr)
-				previousCell->removeSphParticle(sphParticles[i]);
+				previousCell->removeSphParticle(sphParticle);
 			if (currentCell != nullptr)
-				currentCell->addSphParticle(sphParticles[i]);
+				currentCell->addSphParticle(sphParticle);
 		}
+	}
+
+	for (int i = 0; i < particleModelsTerrain.size(); i++) {
+		particleModelsTerrain[i] = glm::translate(glm::mat4(1), terrain->vertices[i].pos);
 	}
 
 	for (int i = 0; i < sphParticleDebugs.size(); i++)

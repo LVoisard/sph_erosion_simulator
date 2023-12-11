@@ -326,6 +326,36 @@ float HeightMap::sampleHeightAtPosition(float x, float y) const {
 
 }
 
+void HeightMap::modify_height(float x, float y, float amount) {
+	x += offset.x;
+	y += offset.y;
+
+	// Float casted to int are truncated towards 0.
+	int xLeft = (int)x;
+	int xRight = xLeft + 1;
+	// This will act as the horizontal weight, indicating how close the point is to one side.
+	float xWeight = x - xLeft; // must be between [0, 1).
+
+	int yDown = (int)y;
+	int yUp = yDown + 1;
+	// This will act as the vertical weight, indicating how close the point is to one side.
+	float yWeight = y - yDown;  // must be between [0, 1).
+
+	if (xLeft < 0 || xLeft >= width || yDown < 0 || yDown >= length) return;
+	if (xRight < 0 || xRight >= width || yUp < 0 || yUp >= length) return;
+
+	// Adjust the weight of each sample by how close the target position is to it.
+	float bottomLeftWeight = (1 - xWeight) * (1 - yWeight);
+	float bottomRightWeight = xWeight * (1 - yWeight);
+	float topLeftWeight = (1 - xWeight) * (yWeight);
+	float topRightWeight = xWeight * yWeight;
+
+	heightMap[xLeft][yDown] += amount * bottomLeftWeight;
+	heightMap[xRight][yDown] += amount * bottomRightWeight;
+	heightMap[xLeft][yUp] += amount * topLeftWeight;
+	heightMap[xRight][yUp] += amount * topRightWeight;
+}
+
 glm::vec3 HeightMap::sampleNormalAtPosition(float x, float y) const
 {
 	// this wont be the exact normal, but can do 

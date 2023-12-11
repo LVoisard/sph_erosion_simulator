@@ -27,6 +27,8 @@ protected:
     glm::vec3 position;
     float radius;
     int id; // largely used for debug purposes
-   
+
+private:
+    static int next_id; // Ids are assigned on creation, with no overlap. This keeps track of the id that will be assigned to the next created particle.
 };
 

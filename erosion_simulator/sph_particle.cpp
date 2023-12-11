@@ -1,10 +1,6 @@
 #include "sph_particle.h"
 
-
-int SphParticle::next_id = 0;
-
-SphParticle::SphParticle(glm::vec3 position, float radius) : Particle(position, radius) {
-	id = SphParticle::next_id++;
+SphParticle::SphParticle(glm::vec3 position, float radius) : _radius(radius), _sedimentCarry(0), Particle(position, radius) {
 }
 
 void SphParticle::update(float deltaTime, float time)
@@ -17,4 +13,9 @@ void SphParticle::setVelocity(glm::vec3 newVelocity) {
 void SphParticle::setDensity(float newDensity) {
 	density = newDensity;
 }
-
+float SphParticle::getSedimentTake() const {
+	return 0.05 * glm::tanh(1 - _sedimentCarry);
+}
+void SphParticle::takeSediment(float amount) {
+	_sedimentCarry += amount;
+}

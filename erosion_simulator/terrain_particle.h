@@ -10,6 +10,4 @@ private:
 	// there's likely a better data structure for this (is there an int-only vector2?)
 	int _coordX;
 	int _coordY;
-
-	static int next_id;
 };

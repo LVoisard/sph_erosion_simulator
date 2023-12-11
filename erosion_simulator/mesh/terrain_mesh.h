@@ -1,5 +1,6 @@
 #pragma once
 #include "quad_mesh.h"
+#include "sph_particle.h"
 
 class TerrainMesh :  public QuadMesh
 {
@@ -15,8 +16,12 @@ public:
 
 	glm::vec3 getNormalAtIndex(int x, int y);
 	glm::vec3 getPositionAtIndex(int x, int y);
+	float sampleHeightAtPosition(float x, float y) const;
+	glm::vec3 sampleNormalAtPosition(float x, float y) const;
+	void modify_height(float, float, float);
 private:
 
 	float* originalHeights;
+	glm::vec2 offset;
 };
 
