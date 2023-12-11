@@ -225,6 +225,11 @@ void ParticleGenerator::updateParticles(float deltaTime, float time)
 			sphParticle->setVelocity(glm::vec3(newVel.x * 0.95f, newVel.y * yStrength, newVel.z * 0.95f));
 			// sphParticle->setVelocity(glm::vec3(vel.x, -vel.y * 0.2, vel.z));
 		}
+		else if (pos.y - rad <= _heightmap->getMinHeight())
+		{
+			sphParticle->setPosition(glm::vec3(pos.x, _heightmap->getMinHeight() + rad, pos.z));
+			sphParticle->setVelocity(glm::vec3(vel.x * 0.5f, -vel.y * 0.05, vel.z * 0.5));
+		}
 		else if (sphParticle->getPosition().y + rad > _heightmap->getMaxHeight() - 1)
 		{
 			sphParticle->setPosition(glm::vec3(pos.x, _heightmap->getMaxHeight() - 1 - rad - 0.001, pos.z));
@@ -257,6 +262,8 @@ void ParticleGenerator::updateParticles(float deltaTime, float time)
 		sphParticleDebugs[i].linearVelocity = glm::length2(sphParticles[i]->getVelocity());
 	}
 	
+	terrain->update();
+
 	/*printf("Nearest Neighbour node to (%f, %f, %f) (ID: %d) is (%f, %f, %f) (ID: %d)\n",
 		particles[0]->getPosition().x, particles[0]->getPosition().y, particles[0]->getPosition().z,
 		particles[0]->getId(),
