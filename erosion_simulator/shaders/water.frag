@@ -8,6 +8,7 @@ in vec2 texCoord;
 flat in int fragIsTarget;
 flat in int fragIsNeighbour;
 in float fragLinearVelocity;
+in float fragSediment;
 
 
 float minWaterHeight = 0.15;
@@ -25,6 +26,7 @@ uniform int waterDebugMode;
 
 
 float maxSpeed = 64;
+float maxSediment = 1;
 
 
 vec3 lightDirection = normalize(vec3(1.0,10.0, 3.0));
@@ -91,8 +93,9 @@ void main()
 	// sediment transportation
 	else if (waterDebugMode == 3)
 	{
-		fragColor = vec4(1,0,1,1);
-		return;
+		float a = fragSediment / 0.01;
+		// right now, since this value is always 0, the particles stay red
+		baseColor = vec3(fragSediment == 0, 75.0 / 256.0, 63.0 / 256.0);
 	}
 	// invisible
 	else if( waterDebugMode == 4)

@@ -48,6 +48,7 @@ void HeightMap::loadHeightMapFromFile(std::string fileName)
 
 	this->width = width;
 	this->length = height;
+	offset = glm::vec2(width / 2, height / 2);
 
 	heightMap = new float* [width];
 	for (int i = 0; i < width; i++) {
