@@ -15,11 +15,11 @@ ParticleGenerator::ParticleGenerator(Shader& shader, Mesh* sphMesh, Mesh* bounda
 
 	std::cout << " height " << (mapWidth - 1) << std::endl;
 	float sphOffset = (cellSize / 1.9 / (numPerSquare));
-	for (int x = 0; x < (mapWidth - 1) / cellSize * numPerSquare / 4; x++)
+	for (int x = 0; x < (mapWidth - 1) / cellSize * numPerSquare / 6; x++)
 	{
 		for (int y = 0; y < 6 * (numPerSquare); y++)
 		{
-			for (int z = 0; z < (mapLength - 1) / cellSize * numPerSquare / 4; z++)
+			for (int z = 0; z < (mapLength - 1) / cellSize * numPerSquare / 6; z++)
 			{
 				//((maxHeight - y) + (float) (y * cellSize / 2 / (numPerSquare)) - (cellSize / 2 / (numPerSquare)))
 				glm::vec3 pos(
@@ -37,7 +37,7 @@ ParticleGenerator::ParticleGenerator(Shader& shader, Mesh* sphMesh, Mesh* bounda
 	for (int x = 0; x < mapWidth; x++) {
 		for (int y = 0; y < mapLength; y++) {
 			glm::vec3 position = map->getPositionAtIndex(x, y);
-			TerrainParticle* terrainPart = new TerrainParticle(position, particleRadius, x, 0);
+			TerrainParticle* terrainPart = new TerrainParticle(position, particleRadius, x, y);
 			terrainParticles.push_back(terrainPart);
 			boundaryParticleDebugs.push_back(BoundaryParticleDebug());
 
@@ -79,12 +79,15 @@ ParticleGenerator::ParticleGenerator(Shader& shader, Mesh* sphMesh, Mesh* bounda
 	glEnableVertexAttribArray(7);
 	glEnableVertexAttribArray(8);
 	glEnableVertexAttribArray(9);
+	glEnableVertexAttribArray(10);
 	glVertexAttribPointer(7, 1, GL_INT, GL_FALSE, sizeof(SPHParticleDebug), (void*)0);
 	glVertexAttribPointer(8, 1, GL_INT, GL_FALSE, sizeof(SPHParticleDebug), (void*)(sizeof(int)));
 	glVertexAttribPointer(9, 1, GL_FLOAT, GL_FALSE, sizeof(SPHParticleDebug), (void*)(sizeof(int) * 2));
+	glVertexAttribPointer(10, 1, GL_FLOAT, GL_FALSE, sizeof(SPHParticleDebug), (void*)(sizeof(int) * 2 + sizeof(float)));
 	glVertexAttribDivisor(7, 1);
 	glVertexAttribDivisor(8, 1);
 	glVertexAttribDivisor(9, 1);
+	glVertexAttribDivisor(10, 1);
 
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 
@@ -157,10 +160,8 @@ void ParticleGenerator::drawGridDebug()
 
 void ParticleGenerator::updateParticles(float deltaTime, float time)
 {
-
-
-	deltaTime = 0.0045;
 	std::unordered_map <SphParticle*, std::vector<SphParticle*>> particleNeigbours;
+	std::unordered_map <SphParticle*, std::vector<TerrainParticle*>> particleBoundaryNeighbours;
 
 	for (int i = 0; i < sphParticles.size(); i++)
 	{
@@ -168,10 +169,14 @@ void ParticleGenerator::updateParticles(float deltaTime, float time)
 
 		// update particle
 		std::vector<SphParticle*> parts = grid.getNeighbouringSPHPaticlesInRadius(sphParticles[i]);
+		std::vector<TerrainParticle*> terr = grid.getNeighbouringTerrainPaticlesInRadius(sphParticles[i]);
 		std::pair<SphParticle*, std::vector<SphParticle*>> pair(sphParticles[i], parts);
+		std::pair<SphParticle*, std::vector<TerrainParticle*>> pair2(sphParticles[i], terr);
 		particleNeigbours.insert(pair);
+		particleBoundaryNeighbours.insert(pair2);
 		calculateDensity(sphParticles[i], particleNeigbours.at(sphParticles[i]), *settings);
 	}
+
 	for (int i = 0; i < sphParticles.size(); i++)
 	{
 		// before updating particle position
@@ -181,14 +186,53 @@ void ParticleGenerator::updateParticles(float deltaTime, float time)
 		calculateViscosity(sphParticles[i], particleNeigbours.at(sphParticles[i]), *settings);
 	}
 
+
+	//
+	// boundary particle calculations
+	// 1. calculate sediment transfer
+	// 
+	// erosion strength
+	float K = 0.0035;
+	// critical shear val
+	float shearCrit = 1;
+	for (int i = 0; i < sphParticles.size(); i++)
+	{
+		SphParticle* particle = sphParticles[i];
+		std::vector<TerrainParticle*> boundaryParts = particleBoundaryNeighbours.at(sphParticles[i]);
+		for (int j = 0; j < boundaryParts.size(); j++)
+		{
+			Cell* startCell = grid.getCellFromPosition(boundaryParts[j]->getPosition());
+			glm::vec3 ab = particle->getPosition() - boundaryParts[j]->getPosition();
+			float shearRate = powf(glm::length(particle->getVelocity()) / glm::distance(particle->getPosition(), boundaryParts[j]->getPosition()), 0.5f);
+			float erosionRate = K * (shearRate - shearCrit) * settings->timeStep;			
+
+			float removeAmount = sphParticles[i]->takeSediment(erosionRate);
+			terrain->modify_height(boundaryParts[j]->getPosition().x, boundaryParts[j]->getPosition().z, -removeAmount);
+			boundaryParts[j]->setPosition(boundaryParts[j]->getPosition() - glm::vec3(0, removeAmount, 0));
+			Cell* endCell = grid.getCellFromPosition(boundaryParts[j]->getPosition());
+			// std::cout<< shearRate << std::endl;
+
+
+
+			if (startCell != endCell)
+			{
+				if (startCell != nullptr)
+					startCell->removeTerrainParticle(boundaryParts[j]);
+				if (endCell != nullptr)
+					endCell->addTerrainParticle(boundaryParts[j]);
+			}
+		}
+	}
+
+	// update the positions and collide
 	for (int i = 0; i < sphParticles.size(); i++)
 	{
 		SphParticle* sphParticle = sphParticles[i];
 		Cell* previousCell = grid.getCellFromPosition(sphParticles[i]->getPosition());
 		glm::vec3 acceleration = glm::vec3(0, settings->g, 0);
 
-		sphParticles[i]->setVelocity(sphParticles[i]->getVelocity() + (acceleration)*deltaTime);
-		sphParticles[i]->setPosition(sphParticles[i]->getPosition() + sphParticles[i]->getVelocity() * deltaTime);
+		sphParticles[i]->setVelocity(sphParticles[i]->getVelocity() + (acceleration) * settings->timeStep);
+		sphParticles[i]->setPosition(sphParticles[i]->getPosition() + sphParticles[i]->getVelocity() * settings->timeStep);
 
 
 		glm::vec3 pos = sphParticle->getPosition();
@@ -214,10 +258,6 @@ void ParticleGenerator::updateParticles(float deltaTime, float time)
 		// UNCOMMENT BELOW
 		float terrainHeightAtPosition = terrain->sampleHeightAtPosition(pos.x, pos.z);
 		if (pos.y - rad <= terrainHeightAtPosition) {
-			float takeAmount = sphParticle->getSedimentTake();
-			terrain->modify_height(pos.x, pos.z, -takeAmount);
-			sphParticle->takeSediment(takeAmount);
-
 			glm::vec3 normal = terrain->sampleNormalAtPosition(pos.x, pos.z);
 			float yStrength = std::clamp(1 - glm::dot(normal, glm::normalize(sphParticle->getVelocity())), 0.05f, 0.95f);
 			sphParticles[i]->setPosition(glm::vec3(pos.x, terrainHeightAtPosition + rad, pos.z));
@@ -251,8 +291,13 @@ void ParticleGenerator::updateParticles(float deltaTime, float time)
 		}
 	}
 
-	for (int i = 0; i < particleModelsTerrain.size(); i++) {
-		particleModelsTerrain[i] = glm::translate(glm::mat4(1), terrain->vertices[i].pos);
+	
+
+
+
+
+	for (int i = 0; i < terrainParticles.size(); i++) {
+		particleModelsTerrain[i] = glm::translate(glm::mat4(1), terrainParticles[i]->getPosition());
 	}
 
 	for (int i = 0; i < sphParticleDebugs.size(); i++)
@@ -260,11 +305,8 @@ void ParticleGenerator::updateParticles(float deltaTime, float time)
 		sphParticleDebugs[i].isNearestNeighbour = false;
 		sphParticleDebugs[i].isNearestNeighbourTarget = false;
 		sphParticleDebugs[i].linearVelocity = glm::length2(sphParticles[i]->getVelocity());
-		float sediment = sphParticles[i]->getSediment();
-		sphParticleDebugs[i].sediment = sediment;
+		sphParticleDebugs[i].sediment = sphParticles[i]->getSediment();
 	}
-	
-	terrain->update();
 
 	/*printf("Nearest Neighbour node to (%f, %f, %f) (ID: %d) is (%f, %f, %f) (ID: %d)\n",
 		particles[0]->getPosition().x, particles[0]->getPosition().y, particles[0]->getPosition().z,

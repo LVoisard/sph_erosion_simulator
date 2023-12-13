@@ -19,6 +19,7 @@ public:
 	float sampleHeightAtPosition(float x, float y) const;
 	glm::vec3 sampleNormalAtPosition(float x, float y) const;
 	void modify_height(float, float, float);
+	void modify_height_at_index(int, int, float);
 private:
 
 	float* originalHeights;

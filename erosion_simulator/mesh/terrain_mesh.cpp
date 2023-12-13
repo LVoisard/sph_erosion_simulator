@@ -171,6 +171,11 @@ void TerrainMesh::modify_height(float x, float y, float amount) {
 	}
 }
 
+void TerrainMesh::modify_height_at_index(int x, int z, float amount)
+{
+	vertices[x * width + z].pos.y += amount;
+}
+
 glm::vec3 TerrainMesh::sampleNormalAtPosition(float x, float y) const
 {
 	// this wont be the exact normal, but can do

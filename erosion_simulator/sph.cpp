@@ -79,11 +79,11 @@ void calculateDensity(SphParticle* particle, std::vector<SphParticle*> neighbour
 		float dist2 = glm::length2((neighbours[i]->getPosition() + neighbours[i]->getVelocity() * settings.timeStep) - (particle->getPosition() + particle->getVelocity() * settings.timeStep));
 		if (dist2 > settings.h2) continue;
 		float dist = sqrt(dist2);
-		density += settings.mass * kernelFuncSpiky3(settings.h, dist);
+		density += neighbours[i]->mass * kernelFuncSpiky3(settings.h, dist);
 	}
 
 	// add particle self density
-	density += settings.mass * kernelFuncSpiky3(settings.h, 0);
+	density += particle->mass * kernelFuncSpiky3(settings.h, 0);
 
 	particle->setDensity(density);
 }
@@ -105,7 +105,7 @@ void calculatePressureForce(SphParticle* particle, std::vector<SphParticle*> nei
 		float dist = glm::length(ab);
 		glm::vec3 dir = ab / std::max(0.001f, dist);
 		float presure = (getPressureFromDensity(particle->getDensity(), settings) + getPressureFromDensity(neighbours[i]->getDensity(), settings)) / 2;
-		pressureForce += -dir * kernelFuncSpiky3(settings.h, dist) * settings.mass * presure / neighbours[i]->getDensity();
+		pressureForce += -dir * kernelFuncSpiky3(settings.h, dist) * neighbours[i]->mass * presure / neighbours[i]->getDensity();
 	}
 	particle->setVelocity(particle->getVelocity() + pressureForce / particle->getDensity() * settings.timeStep);
 }
@@ -119,7 +119,7 @@ void calculateViscosity(SphParticle* particle, std::vector<SphParticle*> neighbo
 		if (glm::length2(ab) > settings.h2) continue;
 
 		float dist = glm::length(ab);
-		viscosityForce += (neighbours[i]->getVelocity() - particle->getVelocity()) / neighbours[i]->getDensity() * kernelFuncViscosity(settings.h, dist) * settings.mass;
+		viscosityForce += (neighbours[i]->getVelocity() - particle->getVelocity()) / neighbours[i]->getDensity() * kernelFuncViscosity(settings.h, dist) * neighbours[i]->mass;
 	}
 
 	particle->setVelocity(particle->getVelocity() + viscosityForce * settings.viscosity * settings.timeStep);
@@ -134,9 +134,9 @@ void calculateSufaceTension(SphParticle* particle, std::vector<SphParticle*> nei
 		if (glm::length2(ab) > settings.h2) continue;
 
 		float dist = glm::length(ab);
-		surfaceTensionForce += ab * kernelFuncSpiky2(settings.h, dist) * settings.mass;
+		surfaceTensionForce += ab * kernelFuncSpiky2(settings.h, dist) * neighbours[i]->mass;
 	}
 
-	particle->setVelocity(particle->getVelocity() + -settings.surfaceTensionMultiplier / settings.mass * surfaceTensionForce * settings.timeStep);
+	particle->setVelocity(particle->getVelocity() + -settings.surfaceTensionMultiplier / particle->mass * surfaceTensionForce * settings.timeStep);
 }
 

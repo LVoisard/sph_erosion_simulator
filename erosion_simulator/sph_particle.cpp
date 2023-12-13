@@ -16,6 +16,13 @@ void SphParticle::setDensity(float newDensity) {
 float SphParticle::getSedimentTake() const {
 	return 0.001 * glm::tanh(1 - _sedimentCarry);
 }
-void SphParticle::takeSediment(float amount) {
+float SphParticle::takeSediment(float amount) {
+
+	if (_sedimentCarry + amount > sedimentSaturation)
+		amount = sedimentSaturation - _sedimentCarry;
+	else if (_sedimentCarry + amount < 0)
+		amount = 0 - _sedimentCarry;
 	_sedimentCarry += amount;
+	mass += amount;
+	return amount;
 }

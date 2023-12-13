@@ -34,6 +34,7 @@ public:
 	Cell* getCellFromPosition(glm::vec3 pos);
 	std::vector<Cell*> getCellNeighbours(Cell* cell);
 	std::vector<SphParticle*> getNeighbouringSPHPaticlesInRadius(Particle* particle);
+	std::vector<TerrainParticle*> getNeighbouringTerrainPaticlesInRadius(Particle* particle);
 	Cell**** cells;
 	float cellSize;
 private:

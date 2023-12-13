@@ -13,12 +13,17 @@ public:
 	float getDensity() const { return density; }
 	float getSediment() const { return _sedimentCarry; }
 	float getSedimentTake() const;
-	void takeSediment(float);
+	float takeSediment(float);
 
+	glm::vec3 sedimentSettlingVelocity = glm::vec3(0);
+
+	float mass = 1;
 	// to be filled in
 private:
 	glm::vec3 velocity = glm::vec3(0);
+	float baseMass = 1;
 	float density = 1;
+	float sedimentSaturation = 0.1;
 	float _radius;
 	float _sedimentCarry;
 };

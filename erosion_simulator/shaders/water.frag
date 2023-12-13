@@ -26,47 +26,10 @@ uniform int waterDebugMode;
 
 
 float maxSpeed = 64;
-float maxSediment = 1;
+float maxSediment = 0.1;
 
 
 vec3 lightDirection = normalize(vec3(1.0,10.0, 3.0));
-
-float getGreen(float velocity)
-{
-	velocity = velocity / maxSpeed;
-
-	float g = 0;
-	if(velocity < 0.25)
-	{
-		g = velocity * 2;
-	}
-	else if (velocity >= 0.75)
-	{
-		g = 1 - velocity * 2;
-	}
-
-	return g;
-}
-
-float getRed(float velocity)
-{
-	velocity = velocity / maxSpeed;
-
-	
-	return (velocity - 0.25) * (4/3);
-	
-}
-
-float getBlue(float velocity)
-{
-	velocity = velocity / maxSpeed;
-
-	if(velocity > 0.5)
-		return 0;
-	else
-		return 1 - (3/4) * velocity;
-
-}
 
 void main()
 {
@@ -93,9 +56,18 @@ void main()
 	// sediment transportation
 	else if (waterDebugMode == 3)
 	{
-		float a = fragSediment / 0.01;
-		// right now, since this value is always 0, the particles stay red
-		baseColor = vec3(fragSediment == 0, 75.0 / 256.0, 63.0 / 256.0);
+		vec3 c;
+		if (maxSediment / 3 >= fragSediment) {
+			float a = smoothstep(0.0, maxSediment / 3, fragSediment);
+			c = mix(vec3(0,0.1,0.8), vec3(0,0.8,0.1), a);
+		} else if (maxSediment / 3 >= fragSediment - maxSediment / 3) {
+			float a = smoothstep(0.0, maxSediment / 3, fragSediment - maxSediment / 3);
+			c = mix(vec3(0,0.8,0.1), vec3(0.5,0.5,0), a);
+		} else {
+			float a = smoothstep(0.0, maxSediment / 3, fragSediment - 2 * maxSediment / 3);
+			c = mix(vec3(0.5,0.5,0), vec3(160 / 255,82 / 255,45 / 255), a);
+		}
+		baseColor = c;
 	}
 	// invisible
 	else if( waterDebugMode == 4)

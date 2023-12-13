@@ -189,6 +189,36 @@ std::vector<SphParticle*> Grid3D::getNeighbouringSPHPaticlesInRadius(Particle* p
 	return parts;
 }
 
+std::vector<TerrainParticle*> Grid3D::getNeighbouringTerrainPaticlesInRadius(Particle* particle)
+{
+	std::vector<TerrainParticle*> parts;
+	Cell* current = getCellFromPosition(particle->getPosition());
+	if (current == nullptr) return parts;
+	std::vector<Cell*> cells = getCellNeighbours(current);
+
+	float searchRadius2 = particleSearchRadius * particleSearchRadius;
+
+	// parts.insert(parts.end(), current->sphParticles.begin(), current->sphParticles.end());
+
+	for (int i = 0; i < current->terrainParticles.size(); i++)
+	{
+		if (current->terrainParticles[i]->getId() != particle->getId() &&
+			glm::distance2(current->terrainParticles[i]->getPosition(), particle->getPosition()) <= searchRadius2)
+			parts.push_back(current->terrainParticles[i]);
+	}
+
+	for (int i = 0; i < cells.size(); i++)
+	{
+		parts.insert(parts.end(), cells[i]->terrainParticles.begin(), cells[i]->terrainParticles.end());
+		//for (int j = 0; j < cells[i]->sphParticles.size(); j++)
+		//{
+		//	/*if(glm::distance2(particle->getPosition(), cells[i]->sphParticles[j]->getPosition()) <= searchRadius2)
+		//		parts.push_back(cells[i]->sphParticles[j]);*/
+		//}
+	}
+	return parts;
+}
+
 Cell::Cell(int x, int y, int z, glm::vec3 pos, float size, bool debug, Shader& shader)
 	:x(x), y(y), z(z), pos(pos), size(size), shader(shader)
 {
