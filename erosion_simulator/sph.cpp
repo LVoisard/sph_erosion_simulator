@@ -8,7 +8,7 @@
 
 SPHSettings::SPHSettings(
 	float mass, float restDensity, float pressureMultiplier, float nearPressureMultiplier, float viscosity, float h,
-	float g, float timeStep)
+	float g, float sedimentSaturation, float timeStep)
 	: mass(mass)
 	, restDensity(restDensity)
 	, pressureMultiplier(pressureMultiplier)
@@ -16,6 +16,7 @@ SPHSettings::SPHSettings(
 	, viscosity(viscosity)
 	, h(h)
 	, g(g)
+	, sedimentSaturation(sedimentSaturation)
 	, timeStep(timeStep)
 {
 	h2 = h * h;
@@ -73,7 +74,6 @@ void calculateDensity(SphParticle* particle, std::vector<SphParticle*> neighbour
 	const SPHSettings& settings)
 {
 	float density = 0;
-	float nearDensity = 0;
 	for (int i = 0; i < neighbours.size(); i++) {
 
 		float dist2 = glm::length2((neighbours[i]->getPosition() + neighbours[i]->getVelocity() * settings.timeStep) - (particle->getPosition() + particle->getVelocity() * settings.timeStep));
@@ -86,6 +86,24 @@ void calculateDensity(SphParticle* particle, std::vector<SphParticle*> neighbour
 	density += particle->mass * kernelFuncSpiky3(settings.h, 0);
 
 	particle->setDensity(density);
+}
+
+void calculateSedimentDensity(SphParticle* particle, std::vector<SphParticle*> neighbours,
+	const SPHSettings& settings)
+{
+	float density = 0;
+	for (int i = 0; i < neighbours.size(); i++) {
+
+		float dist2 = glm::length2((neighbours[i]->getPosition() + neighbours[i]->getVelocity() * settings.timeStep) - (particle->getPosition() + particle->getVelocity() * settings.timeStep));
+		if (dist2 > settings.h2) continue;
+		float dist = sqrt(dist2);
+		density += neighbours[i]->mass * kernelFuncSpiky3(settings.h, dist) * neighbours[i]->getSedimentVolume() / neighbours[i]->getMaxSedimentVolume();
+	}
+
+	// add particle self density
+	density += particle->mass * kernelFuncSpiky3(settings.h, 0) * particle->getSedimentVolume() / particle->getMaxSedimentVolume();
+
+	particle->setSedimentDensity(density);
 }
 
 float getPressureFromDensity(float density, const SPHSettings& settings)

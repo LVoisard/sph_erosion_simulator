@@ -30,6 +30,9 @@ ParticleGenerator::ParticleGenerator(Shader& shader, Mesh* sphMesh, Mesh* bounda
 				sphParticles.push_back(sphPart);
 				particleModels.push_back(glm::translate(glm::mat4(1), sphPart->getPosition()));
 				sphParticleDebugs.push_back(SPHParticleDebug());
+
+				if (rand() % 100 == x || rand() % 100 == z)
+					sphPart->setSediment(0.1);
 			}
 		}
 	}
@@ -175,6 +178,7 @@ void ParticleGenerator::updateParticles(float deltaTime, float time)
 		particleNeigbours.insert(pair);
 		particleBoundaryNeighbours.insert(pair2);
 		calculateDensity(sphParticles[i], particleNeigbours.at(sphParticles[i]), *settings);
+		calculateSedimentDensity(sphParticles[i], particleNeigbours.at(sphParticles[i]), *settings);
 	}
 
 	for (int i = 0; i < sphParticles.size(); i++)
@@ -192,9 +196,9 @@ void ParticleGenerator::updateParticles(float deltaTime, float time)
 	// 1. calculate sediment transfer
 	// 
 	// erosion strength
-	float K = 0.0035;
+	float K = 0.0025;
 	// critical shear val
-	float shearCrit = 1;
+	float shearCrit = 2;
 	for (int i = 0; i < sphParticles.size(); i++)
 	{
 		SphParticle* particle = sphParticles[i];
@@ -213,7 +217,6 @@ void ParticleGenerator::updateParticles(float deltaTime, float time)
 			// std::cout<< shearRate << std::endl;
 
 
-
 			if (startCell != endCell)
 			{
 				if (startCell != nullptr)
@@ -222,6 +225,52 @@ void ParticleGenerator::updateParticles(float deltaTime, float time)
 					endCell->addTerrainParticle(boundaryParts[j]);
 			}
 		}
+
+		std::vector<SphParticle*> neighbours = particleNeigbours.at(sphParticles[i]);
+		float fC = particle->getSedimentVolume() <= settings->sedimentSaturation ? (1 - powf(particle->getSedimentVolume() / settings->sedimentSaturation, 4.5)) : 0;
+		glm::vec3 settlingVelo = particle->getVelocity() + glm::vec3(0, settings->g, 0) * settings->timeStep;
+		
+		// std::cout << settlingVelo.x << " " << settlingVelo.y << " " << settlingVelo.z << std::endl;
+		
+		float diffusion = 0;
+		float transfer = 0;
+		for (int j = 0; j < neighbours.size(); j++)
+		{
+			glm::vec3 ab = neighbours[j]->getPosition() - particle->getPosition();
+			float length = glm::length(ab);
+			glm::vec3 abNorm = ab / length;
+
+			float dotDir = glm::dot(settlingVelo, ab);
+			float amt = 0;
+			
+			//doesnt work idk why
+			// donor
+			if (dotDir >= 0) 
+			{
+				//if (neighbours[j]->getSediment() >= settings->sedimentSaturation || particle->getSediment() <= 0) continue;
+				amt = neighbours[j]->mass * neighbours[j]->getSedimentVolume() / neighbours[j]->getDensity() * glm::dot(settlingVelo, abNorm) * kernelFuncSpiky3(settings->h, length);
+				//neighbours[j]->setSediment(neighbours[j]->getSediment() + amt);
+			}
+			// acceptor
+			else
+			{
+				//if (particle->getSediment() >= settings->sedimentSaturation || neighbours[j]->getSediment() <= 0) continue;
+				amt = particle->mass * particle->getSedimentVolume() / particle->getDensity() * glm::dot(settlingVelo, abNorm) * kernelFuncSpiky3(settings->h, length);
+				//particle->setSediment(particle->getSediment() + amt);
+			}
+
+			transfer -= amt;
+			diffusion -= neighbours[j]->mass / (particle->getDensity() * neighbours[j]->getDensity()) * 10.f * (particle->getSedimentVolume() - neighbours[j]->getSedimentVolume()) * kernelFuncSpiky3(settings->h, glm::distance(particle->getPosition(), neighbours[j]->getPosition()));
+			
+		}
+		//std::cout << transfer * settings->timeStep << std::endl;
+		//std::cout << "FC" << fC << std::endl;
+		//std::cout << particle->getSediment() << std::endl;
+
+		//std::cout << particle->getSedimentDensity() << std::endl;
+		//if (particle->getSediment() > 0)
+		//std::cout << diffusion << std::endl;
+		particle->setSediment(particle->getSediment() + ((diffusion) * settings->timeStep));
 	}
 
 	// update the positions and collide
@@ -306,6 +355,7 @@ void ParticleGenerator::updateParticles(float deltaTime, float time)
 		sphParticleDebugs[i].isNearestNeighbourTarget = false;
 		sphParticleDebugs[i].linearVelocity = glm::length2(sphParticles[i]->getVelocity());
 		sphParticleDebugs[i].sediment = sphParticles[i]->getSediment();
+		// std::cout << sphParticles[i]->getSediment() << std::endl;
 	}
 
 	/*printf("Nearest Neighbour node to (%f, %f, %f) (ID: %d) is (%f, %f, %f) (ID: %d)\n",

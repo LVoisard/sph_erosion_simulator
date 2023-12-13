@@ -26,7 +26,7 @@ uniform int waterDebugMode;
 
 
 float maxSpeed = 64;
-float maxSediment = 0.1;
+float maxSediment = 0.01;
 
 
 vec3 lightDirection = normalize(vec3(1.0,10.0, 3.0));
@@ -56,17 +56,9 @@ void main()
 	// sediment transportation
 	else if (waterDebugMode == 3)
 	{
-		vec3 c;
-		if (maxSediment / 3 >= fragSediment) {
-			float a = smoothstep(0.0, maxSediment / 3, fragSediment);
-			c = mix(vec3(0,0.1,0.8), vec3(0,0.8,0.1), a);
-		} else if (maxSediment / 3 >= fragSediment - maxSediment / 3) {
-			float a = smoothstep(0.0, maxSediment / 3, fragSediment - maxSediment / 3);
-			c = mix(vec3(0,0.8,0.1), vec3(0.5,0.5,0), a);
-		} else {
-			float a = smoothstep(0.0, maxSediment / 3, fragSediment - 2 * maxSediment / 3);
-			c = mix(vec3(0.5,0.5,0), vec3(160 / 255,82 / 255,45 / 255), a);
-		}
+		float a = smoothstep(0.0, maxSediment, fragSediment);
+		vec3 c = mix(baseColor, vec3(112.0 / 255.0, 84.0 / 255.0, 62.0 / 255.0), a);		
+		
 		baseColor = c;
 	}
 	// invisible
