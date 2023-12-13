@@ -197,6 +197,9 @@
     <ClInclude Include="sph.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="cellposition.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="shaders\main.vert" />

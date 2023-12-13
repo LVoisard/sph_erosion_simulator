@@ -1,4 +1,5 @@
 #include "terrain_mesh.h"
+#include "cellposition.hpp"
 
 TerrainMesh::TerrainMesh(int width, int length, float*** terrainHeights, Shader shader)
 	:QuadMesh(width, length, shader)
@@ -109,29 +110,6 @@ glm::vec3 TerrainMesh::getPositionAtIndex(int x, int y)
 {
 	return vertices[y * width + x].pos;
 }
-
-struct CellPosition {
-	int xLeft;
-	int xRight;
-	int yDown;
-	int yUp;
-	float xWeight;
-	float yWeight;
-
-public: 
-	CellPosition(float x, float y) {
-		// Float casted to int are truncated towards 0.
-		xLeft = (int)x;
-		xRight = xLeft + 1;
-		// This will act as the horizontal weight, indicating how close the point is to one side.
-		xWeight = x - xLeft; // must be between [0, 1).
-
-		yDown = (int)y;
-		yUp = yDown + 1;
-		// This will act as the vertical weight, indicating how close the point is to one side.
-		yWeight = y - yDown;  // must be between [0, 1).
-	}
-};
 
 float TerrainMesh::sampleHeightAtPosition(float x, float y) const {
 	// The position we sample lies within a grid cell of our heightmap.

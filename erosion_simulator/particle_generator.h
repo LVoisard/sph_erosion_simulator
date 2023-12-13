@@ -12,11 +12,13 @@ struct SPHParticleDebug {
 	int isNearestNeighbourTarget;
 	int isNearestNeighbour;
 	float linearVelocity;
+	float sediment;
 
 	SPHParticleDebug() {
 		isNearestNeighbourTarget = 0;
 		isNearestNeighbour = 0;
 		linearVelocity = 0;
+		sediment = 0;
 	}
 };
 

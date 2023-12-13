@@ -260,6 +260,8 @@ void ParticleGenerator::updateParticles(float deltaTime, float time)
 		sphParticleDebugs[i].isNearestNeighbour = false;
 		sphParticleDebugs[i].isNearestNeighbourTarget = false;
 		sphParticleDebugs[i].linearVelocity = glm::length2(sphParticles[i]->getVelocity());
+		float sediment = sphParticles[i]->getSediment();
+		sphParticleDebugs[i].sediment = sediment;
 	}
 	
 	terrain->update();
@@ -287,7 +289,7 @@ void ParticleGenerator::updateParticles(float deltaTime, float time)
 	// update the debug buffer
 	glBindBuffer(GL_ARRAY_BUFFER, sphDebugBuffer);
 	void* debugData = glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
-	memcpy(debugData, sphParticleDebugs.data(), sizeof(sphParticleDebugs[0]) * sphParticleDebugs.size());
+	memcpy(debugData, sphParticleDebugs.data(), sizeof(SPHParticleDebug) * sphParticleDebugs.size());
 	glUnmapBuffer(GL_ARRAY_BUFFER);
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 

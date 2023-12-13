@@ -289,8 +289,6 @@ float HeightMap::sampleHeightAtPosition(float x, float y) const {
 	// The position we sample lies within a grid cell of our heightmap.
 	// We sample the four corners of that cell and return an average weighted
 	// by how close the position we sample is to each corner.
-
-
 	x += offset.x;
 	y += offset.y;
 

@@ -11,6 +11,7 @@ public:
 
 	glm::vec3 getVelocity() const { return velocity; }
 	float getDensity() const { return density; }
+	float getSediment() const { return _sedimentCarry; }
 	float getSedimentTake() const;
 	void takeSediment(float);
 
