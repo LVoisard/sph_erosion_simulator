@@ -101,12 +101,12 @@ void TerrainMesh::init()
 	glBindVertexArray(0);
 }
 
-glm::vec3 TerrainMesh::getNormalAtIndex(int x, int y)
+glm::vec3 TerrainMesh::getNormalAtIndex(int x, int y) const
 {
 	return vertices[y * width + x].normal;
 }
 
-glm::vec3 TerrainMesh::getPositionAtIndex(int x, int y)
+glm::vec3 TerrainMesh::getPositionAtIndex(int x, int y) const
 {
 	return vertices[y * width + x].pos;
 }
@@ -140,7 +140,7 @@ float TerrainMesh::sampleHeightAtPosition(float x, float y) const {
 void TerrainMesh::modify_height(float x, float y, float amount) {
 	x += offset.x;
 	y += offset.y;
-	CellPosition cell = CellPosition(x, y);
+	CellPosition cell(x, y);
 
 	// Sample the heightmap at each of the cell's corner.
 	if (cell.xLeft < 0 || cell.xLeft >= width || cell.yDown < 0 || cell.yDown >= length) return;
@@ -181,14 +181,7 @@ glm::vec3 TerrainMesh::sampleNormalAtPosition(float x, float y) const
 	// this wont be the exact normal, but can do
 	// we could probably just sample the normals of the 4 cell corners this lands in and perform a weighted average, which would be much less expensive than this
 
-	// Float casted to int are truncated towards 0.
-	int xLeft = (int)(x - 1);
-	int xRight = (int)(x + 1);
-	// This will act as the horizontal weight, indicating how close the point is to one side.
-
-	int yDown = (int)(y - 1);
-	int yUp = (int)(y + 1);
-	// This will act as the vertical weight, indicating how close the point is to one side.
+	CellPosition cell(x, y);
 
 	// Sample the heightmap at each of the cell's corner.
 
@@ -199,20 +192,32 @@ glm::vec3 TerrainMesh::sampleNormalAtPosition(float x, float y) const
 	glm::vec3 top = glm::vec3(self);
 	glm::vec3 bottom = glm::vec3(self);
 
-	if (xLeft >= -offset.x)
-		left = glm::vec3(xLeft, sampleHeightAtPosition(xLeft, y), y);
-	if (xRight <= width + offset.x)
-		right = glm::vec3(xRight, sampleHeightAtPosition(xRight, y), y);
-	if (yUp <= length + offset.y)
-		top = glm::vec3(x, sampleHeightAtPosition(x, yUp), yUp);
-	if (yDown >= -offset.y)
-		bottom = glm::vec3(x, sampleHeightAtPosition(x, yDown), yDown);
+	if (cell.xLeft >= -offset.x)
+		left = glm::vec3(cell.xLeft, sampleHeightAtPosition(cell.xLeft, y), y);
+	if (cell.xRight <= width + offset.x)
+		right = glm::vec3(cell.xRight, sampleHeightAtPosition(cell.xRight, y), y);
+	if (cell.yUp <= length + offset.y)
+		top = glm::vec3(x, sampleHeightAtPosition(x, cell.yUp), cell.yUp);
+	if (cell.yDown >= -offset.y)
+		bottom = glm::vec3(x, sampleHeightAtPosition(x, cell.yDown), cell.yDown);
 
-	glm::vec3 normal = glm::cross(glm::normalize(right - left), glm::normalize(top - bottom));
+	return glm::normalize(glm::cross(right - left, top - bottom));
+}
 
-	// Adjust the weight of each sample by how close the target position is to it.
+glm::vec3 TerrainMesh::sampleWeightedNormalAtPosition(float x, float y) const {
+	x += offset.x;
+	y += offset.y;
+	CellPosition cell(x, y);
 
+	glm::vec3 bottomLeftNormal = getNormalAtIndex(cell.xLeft, cell.yDown);
+	glm::vec3 bottomRightNormal = getNormalAtIndex(cell.xRight, cell.yDown);
+	glm::vec3 topLeftNormal = getNormalAtIndex(cell.xLeft, cell.yUp);
+	glm::vec3 topRightNormal = getNormalAtIndex(cell.xRight, cell.yUp);
 
-	// Return the average.
-	return normal;
+	bottomLeftNormal *= (1 - cell.xWeight) * (1 - cell.yWeight);
+	bottomRightNormal *= cell.xWeight * (1 - cell.yWeight);
+	topLeftNormal *= (1 - cell.xWeight) * (cell.yWeight);
+	topRightNormal *= cell.xWeight * cell.yWeight;
+
+	return glm::normalize(bottomLeftNormal + bottomRightNormal + topLeftNormal + topRightNormal);
 }

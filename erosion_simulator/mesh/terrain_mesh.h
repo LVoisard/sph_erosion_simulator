@@ -14,10 +14,11 @@ public:
 	void updateOriginalHeights(float*** heights);
 	virtual void init() override;
 
-	glm::vec3 getNormalAtIndex(int x, int y);
-	glm::vec3 getPositionAtIndex(int x, int y);
+	glm::vec3 getNormalAtIndex(int x, int y) const;
+	glm::vec3 getPositionAtIndex(int x, int y) const;
 	float sampleHeightAtPosition(float x, float y) const;
 	glm::vec3 sampleNormalAtPosition(float x, float y) const;
+	glm::vec3 sampleWeightedNormalAtPosition(float x, float y) const;
 	void modify_height(float, float, float);
 	void modify_height_at_index(int, int, float);
 private:

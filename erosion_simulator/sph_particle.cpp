@@ -25,9 +25,6 @@ void SphParticle::setSediment(float sediment)
 	_sedimentCarry = sediment;
 	// mass = baseMass + _sedimentCarry;
 }
-float SphParticle::getSedimentTake() const {
-	return 0.001 * glm::tanh(1 - _sedimentCarry);
-}
 float SphParticle::takeSediment(float amount) {
 
 	if (_sedimentCarry + amount > sedimentSaturation) {

@@ -307,7 +307,7 @@ void ParticleGenerator::updateParticles(float deltaTime, float time)
 		// UNCOMMENT BELOW
 		float terrainHeightAtPosition = terrain->sampleHeightAtPosition(pos.x, pos.z);
 		if (pos.y - rad <= terrainHeightAtPosition) {
-			glm::vec3 normal = terrain->sampleNormalAtPosition(pos.x, pos.z);
+			glm::vec3 normal = terrain->sampleWeightedNormalAtPosition(pos.x, pos.z);
 			float yStrength = std::clamp(1 - glm::dot(normal, glm::normalize(sphParticle->getVelocity())), 0.05f, 0.95f);
 			sphParticles[i]->setPosition(glm::vec3(pos.x, terrainHeightAtPosition + rad, pos.z));
 			glm::vec3 newVel = glm::reflect(sphParticle->getVelocity(), normal);

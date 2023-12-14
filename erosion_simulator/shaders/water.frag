@@ -56,8 +56,9 @@ void main()
 	// sediment transportation
 	else if (waterDebugMode == 3)
 	{
-		float a = smoothstep(0.0, maxSediment, fragSediment);
-		vec3 c = mix(baseColor, vec3(112.0 / 255.0, 84.0 / 255.0, 62.0 / 255.0), a);		
+		// bias the value to make the sediment more obvious, but 33% and 100% sediment will look the same.
+		float a = smoothstep(0.0, maxSediment, fragSediment) * 3;
+		vec3 c = mix(baseColor, vec3(112.0 / 255.0, 84.0 / 255.0, 62.0 / 255.0), a);	
 		
 		baseColor = c;
 	}

@@ -15,7 +15,6 @@ public:
 	float getDensity() const { return density; }
 	float getSedimentDensity() const { return sedimentDensity; }
 	float getSediment() const { return _sedimentCarry; }
-	float getSedimentTake() const;
 	float takeSediment(float);
 	float getSedimentVolume();
 	float getMaxSedimentVolume() const;
@@ -23,7 +22,7 @@ public:
 	glm::vec3 sedimentSettlingVelocity = glm::vec3(0);
 
 	float mass = 1;
-	const float sedimentSaturation = 0.02;
+	const float sedimentSaturation = 1; // likely not realistic, but better for showcasing erosion
 	// to be filled in
 private:
 	glm::vec3 velocity = glm::vec3(0);
