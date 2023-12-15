@@ -14,23 +14,19 @@
 	</header>
 	<section id="pageContent">
 		<main role="main">
-			<article>
-				<h2 id="REPORT">REPORT</h2>
-				<p>Consult the project report <a href="./report.pdf">here</a>.</p>
-			</article>
 			<article id="GOAL">
 				<h2>PROJECT GOAL</h2>
 				<p>For our final project, we aimed to deliver an OpenGL application that could simulate fluid dynamics and its erosion effects on terrain in real-time.</p>
-				<p>The project was too ambitious and we were not able to implement all parts we wanted, but we believe that the result is still respectable.</p>
+				<p>The project was too ambitious and we were not able to implement all parts we wanted, but we believe that the results are still respectable.</p>
 			</article>
 			<article id="RESULTS">
 				<h2>EVOLUTION OF RESULTS</h2>
                 <p>
 					As it happens gradually, erosion and sediment deposition can be difficult to notice. The videos below here are sped up as to better showcase them.
-					Such changes to the terrain can be made more obvious by quickly scrubbing through the video with the timeline bar. We also recommend viewing the videos in fullscreen to that effect.
+					Such changes to the terrain can be made more obvious by quickly scrubbing through the video using the timeline bar. We also recommend viewing the videos in fullscreen to that effect.
 				</p>
 				<br/>
-				<p>The amount of sediment contained within each sph particle is indicated by its color turning from blue to orange. Some particles are randomly chosen to start with some sediment</p>
+				<p>The amount of sediment contained within each SPH particle is indicated by its color turning from blue to orange. Some particles are randomly chosen to start with some sediment</p>
                 <br><video width="600" controls><source src="02_3.mp4"></video>
                 <br><video width="600" controls><source src="02_2.mp4"></video>
 				<p>Erosion along the slope leading to noticeable sediment deposition at the bottom.</p>
@@ -45,13 +41,13 @@
 				<br/><br/>
 				<h3>Surface Normal Calculations</h3><br/>
 				<p>
-					During development, we noticed that there were inaccuracies in the behavior of the sph fluid, especially so near the borders of the terrain. 
+					During development, we noticed that there were inaccuracies in the behavior of the SPH fluid, especially so near the borders of the terrain. 
 					This turned out to be the caused by the way we computed surface normals from the terrain. 
 					The videos below showcase the fluid behavior prior to demonstrate improvements made in this regard.
 				</p>
 
                 <br><video width="600" controls><source src="01_2.mp4"></video>
-				<p>The fluid flows less naturally, and seems to "stick" to the cliffside. Erosion occurs as it should.</p>
+				<p>The fluid flows less naturally, and seems to "stick" to the cliffside. Erosion occurs as it should regardless.</p>
 
                 <br><video width="600" controls><source src="00.mp4"></video>
 				<p>An extreme example where the fluid in the border cells would climb uphill.</p>
@@ -63,9 +59,9 @@
 					We did not have time to implement proper fluid sources or paint brushes to edit terrain in real-time. 
 				<p>
 				</p>
-					Despite this, the sph simulation paired with the erosion model can still able to demonstrate 
+					Despite this, the SPH simulation paired with the erosion model can still demonstrate 
 					nice and, altough exaggerated for demonstration purposes, believeable-looking erosion. 
-					The project exists as a nice proof of concept that could be expanded if desired.
+					The project exists as a nice proof of concept that could be expanded later if desired.
 				</p>
 			</article>
 			<article>
@@ -77,7 +73,6 @@
 		<aside>
 			<div class="sidebar">
                 <hr>
-                <a href="#REPORT" class="sectionLink">REPORT</a><hr>
                 <a href="#GOAL" class="sectionLink">PROJECT GOAL</a><hr>
                 <a href="#RESULTS" class="sectionLink">EVOLUTION OF RESULTS</a><hr>
                 <a href="#REFLECTION" class="sectionLink">REFLECTION</a><hr>
