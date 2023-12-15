@@ -183,10 +183,6 @@ void Window::Menu(ErosionModel* model, SPHSettings* settings, SimulationParamete
                 {
                     model->terrainDebugMode = TerrainDebugMode::TERRAIN_NORMAL;
                 }
-                if (ImGui::MenuItem("Erosion Susceptibility", NULL))
-                {
-                    model->terrainDebugMode = TerrainDebugMode::TERRAIN_SUSCEPTIBILITY;
-                }
                 if (ImGui::MenuItem("Sediment Deposition", NULL))
                 {
                     model->terrainDebugMode = TerrainDebugMode::TERRAIN_SEDIMENT_DEPOSITION;

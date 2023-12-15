@@ -5,7 +5,6 @@
 enum class TerrainDebugMode
 {
 	TERRAIN_NORMAL,
-	TERRAIN_SUSCEPTIBILITY,
 	TERRAIN_SEDIMENT_DEPOSITION,
 	TERRAIN_INVISIBLE,
 	COUNT, // used to cycle through options

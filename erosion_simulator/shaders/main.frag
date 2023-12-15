@@ -25,16 +25,7 @@ uniform int debugMode;
 void main()
 {
 	// debug modes
-
-	// show how prone the terrain is to being erroded by force-based erosion
-	if(debugMode == 1)		
-	{
-		float tiltAngle = acos(dot(fragNormal, vec3(0, 1, 0)));
-		float terrainProne = max(sin(tiltAngle), 0.05);
-		FragColor = vec4(terrainProne, 0, 0, 1);
-		return;
-	} 
-	else if (debugMode == 2)
+	if (debugMode == 1)
 	{
 		float sedimentDeposited = fragPos.y - fragOriginalHeight;
 		if(sedimentDeposited > 0)
@@ -43,7 +34,7 @@ void main()
 			FragColor = vec4(min(abs(sedimentDeposited), 1),0,0,1);
 		return;
 	}
-	else if (debugMode == 3)
+	else if (debugMode == 2)
 	{
 		FragColor = vec4(0);
 		return;
@@ -83,6 +74,7 @@ void main()
 	vec4 diffuseColor = vec4(vec3(1.0, 1.0, 1.0) * 1.0 * diffuseFactor, 1.0);
 
 	FragColor = ambientColor * diffuseColor;
+	
 	if(length((fragPos - cursorOverTerrainPos)) < brushRadius) {
 		FragColor = clamp(FragColor + vec4(0.25), vec4(0.0), vec4(1.0));
 	}

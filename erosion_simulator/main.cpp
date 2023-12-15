@@ -182,6 +182,8 @@ void UpdateShaders(glm::mat4& view, glm::mat4& proj, glm::mat4& model, float& de
 	mainShader.setMat4("view", view);
 	mainShader.setMat4("projection", proj);
 	mainShader.setUniformVector3("cursorOverTerrainPos", cursorOverPosition);
+	mainShader.setUniformInt("debugMode", (int)erosionModel.terrainDebugMode);
+	mainShader.setUniformFloat("brushRadius", &erosionModel.brushRadius);
 
 	mainShader.setTexture("texture0", 0);
 	grassTexture.use(GL_TEXTURE0);
